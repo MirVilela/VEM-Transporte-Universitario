@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="Sistema Preditivo de Transporte Universitário — Reserve sua vaga no ônibus em segundos.">
+    <meta name="theme-color" content="#0f0c29">
+    <title>VEM — Transporte Universitário</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        /* ══════════════════════════════════════════════
+           DESIGN SYSTEM — Glassmorphism Premium
+           Paleta: Deep Blue → Dark Purple
+           Mobile-First | Offline-First | POUR AAA
+        ══════════════════════════════════════════════ */
+
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-start: #001f3f;
+            --bg-mid: #003366;
+            --bg-end: #001a35;
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --glass-shadow: rgba(0, 0, 0, 0.3);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --accent: #f39c12;
+            --accent-glow: rgba(243, 156, 18, 0.4);
+            --accent-hover: #e67e22;
+            --success: #00c896;
+            --success-glow: rgba(0, 200, 150, 0.3);
+            --danger: #ff6b6b;
+            --toggle-on: #f39c12;
+            --toggle-off: rgba(255, 255, 255, 0.12);
+            --radius: 16px;
+            --radius-sm: 12px;
+            --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+        }
+
+        html {
+            font-size: 16px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: var(--font);
+            background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-mid) 50%, var(--bg-end) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            overflow-x: hidden;
+        }
+
+        /* Animated background orbs */
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+            z-index: 0;
+            pointer-events: none;
+        }
+        body::before {
+            width: 400px;
+            height: 400px;
+            background: var(--accent);
+            top: -100px;
+            right: -100px;
+            animation: float-orb 8s ease-in-out infinite alternate;
+        }
+        body::after {
+            width: 300px;
+            height: 300px;
+            background: #e040fb;
+            bottom: -80px;
+            left: -80px;
+            animation: float-orb 10s ease-in-out infinite alternate-reverse;
+        }
+
+        @keyframes float-orb {
+            0%   { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, -40px) scale(1.1); }
+        }
+
+        /* ── Glass Card ── */
+        .glass-card {
+            position: relative;
+            z-index: 1;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            box-shadow: 0 8px 32px var(--glass-shadow);
+            padding: 2rem 1.5rem;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        /* ── Typography ── */
+        .logo {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .logo-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.25rem;
+            display: block;
+        }
+        .logo h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .logo p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* ── Forms ── */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.4rem;
+            letter-spacing: 0.3px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: var(--font);
+            transition: border-color var(--transition), box-shadow var(--transition);
+            outline: none;
+        }
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+        .form-group input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        .form-group .input-hint {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.3rem;
+        }
+        .form-group .input-error {
+            font-size: 0.75rem;
+            color: var(--danger);
+            margin-top: 0.3rem;
+            display: none;
+        }
+
+        /* ── Buttons ── */
+        .btn {
+            display: block;
+            width: 100%;
+            min-height: 52px;
+            padding: 0.9rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-weight: 700;
+            font-family: var(--font);
+            cursor: pointer;
+            transition: all var(--transition);
+            letter-spacing: 0.3px;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            color: #fff;
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+        .btn-primary:hover,
+        .btn-primary:focus-visible {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 28px var(--accent-glow);
+        }
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-secondary {
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--glass-border);
+        }
+        .btn-secondary:hover,
+        .btn-secondary:focus-visible {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        /* ── Screens ── */
+        .screen {
+            display: none;
+            animation: fadeSlideIn 0.4s ease-out;
+        }
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Calendar (Tela 2) ── */
+        .calendar-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .calendar-header h2 {
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+        .calendar-header .user-route {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.2rem;
+        }
+        .calendar-header .week-label {
+            display: inline-block;
+            margin-top: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            background: rgba(108, 99, 255, 0.15);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .day-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.85rem 1rem;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.6rem;
+            transition: background var(--transition);
+        }
+        .day-card:hover {
+            background: rgba(255, 255, 255, 0.07);
+        }
+        .day-card .day-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .day-card .day-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+        .day-card .day-date {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+        .day-card .toggles {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* ── Toggle Buttons (IDA / VOLTA) ── */
+        .toggle-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+            min-width: 72px;
+            min-height: 48px;
+            padding: 0.5rem 0.7rem;
+            border-radius: 10px;
+            border: 1.5px solid rgba(255, 255, 255, 0.1);
+            background: var(--toggle-off);
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            font-weight: 700;
+            font-family: var(--font);
+            cursor: pointer;
+            transition: all var(--transition);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .toggle-btn[aria-pressed="true"] {
+            background: var(--toggle-on);
+            border-color: var(--accent);
+            color: #fff;
+            box-shadow: 0 2px 12px var(--accent-glow);
+        }
+        .toggle-btn:hover,
+        .toggle-btn:focus-visible {
+            border-color: var(--accent);
+        }
+        .toggle-btn:active {
+            transform: scale(0.96);
+        }
+        .toggle-btn .toggle-icon {
+            font-size: 1rem;
+        }
+
+        /* ── Success Screen (Tela 3) ── */
+        .success-container {
+            text-align: center;
+        }
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.25rem;
+        }
+        .success-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+        .success-icon .circle {
+            fill: none;
+            stroke: var(--success);
+            stroke-width: 3;
+            stroke-dasharray: 220;
+            stroke-dashoffset: 220;
+            animation: drawCircle 0.6s ease-out 0.1s forwards;
+        }
+        .success-icon .check {
+            fill: none;
+            stroke: var(--success);
+            stroke-width: 3.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 50;
+            stroke-dashoffset: 50;
+            animation: drawCheck 0.4s ease-out 0.5s forwards;
+        }
+
+        @keyframes drawCircle {
+            to { stroke-dashoffset: 0; }
+        }
+        @keyframes drawCheck {
+            to { stroke-dashoffset: 0; }
+        }
+
+        .success-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--success);
+        }
+        .success-summary {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+        }
+        .success-summary .day-chip {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            margin: 0.15rem;
+            background: rgba(0, 200, 150, 0.15);
+            border-radius: 6px;
+            font-size: 0.78rem;
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        /* ── Loading Spinner ── */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2.5px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            vertical-align: middle;
+            margin-right: 0.4rem;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ── Accessibility: Focus visible ── */
+        *:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        /* ── Responsive: wider screens ── */
+        @media (min-width: 480px) {
+            .glass-card {
+                padding: 2.5rem 2rem;
+            }
+        }
+
+        /* ── Reduced motion ── */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* ── Avisos Banner (Requisito A) ── */
+        .avisos-container {
+            width: 100%;
+            max-width: 420px;
+            margin-bottom: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        .aviso-banner {
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-sm);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            animation: fadeSlideIn 0.4s ease-out;
+        }
+        .aviso-banner.aviso-urgente {
+            background: rgba(255, 107, 107, 0.15);
+            border: 1px solid rgba(255, 107, 107, 0.4);
+        }
+        .aviso-banner.aviso-info {
+            background: rgba(108, 99, 255, 0.12);
+            border: 1px solid rgba(108, 99, 255, 0.3);
+        }
+        .aviso-tipo {
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
+        }
+        .aviso-urgente .aviso-tipo { color: #ff6b6b; }
+        .aviso-info .aviso-tipo { color: var(--accent); }
+        .aviso-titulo {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.2rem;
+        }
+        .aviso-mensagem {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+        .aviso-data {
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            margin-top: 0.3rem;
+            text-align: right;
+            opacity: 0.7;
+        }
+
+        /* ── Status de Viagem (Requisito B) ── */
+        .tracking-card {
+            width: 100%;
+            max-width: 420px;
+            position: relative;
+            z-index: 1;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            box-shadow: 0 8px 32px var(--glass-shadow);
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+            animation: fadeSlideIn 0.4s ease-out;
+        }
+        .tracking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+        .tracking-header h3 {
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+        .tracking-status-badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            text-transform: uppercase;
+        }
+        .tracking-status-badge.em-rota {
+            background: rgba(0, 200, 150, 0.15);
+            color: var(--success);
+        }
+        .tracking-status-badge.aguardando {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-secondary);
+        }
+        .tracking-status-badge.finalizada {
+            background: rgba(108, 99, 255, 0.15);
+            color: var(--accent);
+        }
+        .tracking-progress {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            padding: 0.5rem 0;
+            margin-bottom: 0.5rem;
+        }
+        .tracking-progress-line {
+            position: absolute;
+            top: 50%;
+            left: 8px;
+            right: 8px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            transform: translateY(-50%);
+        }
+        .tracking-progress-fill {
+            position: absolute;
+            top: 50%;
+            left: 8px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--success), var(--accent));
+            border-radius: 2px;
+            transform: translateY(-50%);
+            transition: width 0.5s ease;
+        }
+        .tracking-point {
+            position: relative;
+            z-index: 2;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.12);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        .tracking-point.passed {
+            background: var(--success);
+            border-color: var(--success);
+            box-shadow: 0 0 8px var(--success-glow);
+        }
+        .tracking-point.current {
+            background: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 0 10px var(--accent-glow);
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { box-shadow: 0 0 8px var(--accent-glow); }
+            50% { box-shadow: 0 0 16px var(--accent-glow); }
+        }
+        .tracking-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        .tracking-label {
+            font-size: 0.6rem;
+            color: var(--text-secondary);
+            text-align: center;
+            flex: 1;
+            max-width: 60px;
+            word-break: break-word;
+        }
+        .tracking-label.current-label {
+            color: var(--accent);
+            font-weight: 700;
+        }
+        .tracking-info {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .tracking-info .ponto-atual {
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* ── Bottom Nav ── */
+        .bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(18, 18, 18, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-top: 1px solid var(--glass-border);
+            z-index: 1000;
+            justify-content: space-around;
+            padding: 0.5rem 0;
+            padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+        }
+        .bottom-nav.active {
+            display: flex;
+        }
+        .nav-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: color 0.3s ease;
+        }
+        .nav-btn::before {
+            content: '';
+            display: block;
+            width: 24px;
+            height: 24px;
+            font-size: 1.2rem;
+            line-height: 1;
+            opacity: 0.7;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .nav-btn[data-target="screen-dashboard"]::before { content: '🏠'; }
+        .nav-btn[data-target="screen-calendar"]::before { content: '📅'; }
+        .nav-btn#btn-nav-sair::before { content: '🚪'; }
+
+        .nav-btn.active {
+            color: var(--accent);
+        }
+        .nav-btn.active::before {
+            opacity: 1;
+            transform: translateY(-2px);
+            filter: drop-shadow(0 0 4px var(--accent-glow));
+        }
+        
+        #screen-dashboard .dashboard-section-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin: 1.5rem 0 0.75rem 0;
+            font-weight: 600;
+        }
+        
+        body { padding-bottom: 70px; } /* Space for bottom nav */
+    </style>
+</head>
+<body>
+    <!-- ══════════════════════════════════════
+         TELA 1: LOGIN (CPF + PIN)
+    ══════════════════════════════════════ -->
+    <main class="glass-card screen active" id="screen-login" role="main" aria-label="Tela de Login">
+        <div class="logo">
+            <span class="logo-icon" aria-hidden="true">🚌</span>
+            <h1>Transporte Universitário</h1>
+            <p>Reserve sua vaga em segundos</p>
+        </div>
+
+        <form id="form-login" novalidate>
+            <div class="form-group">
+                <label for="input-cpf">CPF</label>
+                <input
+                    type="tel"
+                    id="input-cpf"
+                    name="cpf"
+                    inputmode="numeric"
+                    pattern="[0-9]{11}"
+                    maxlength="14"
+                    placeholder="000.000.000-00"
+                    autocomplete="off"
+                    required
+                    aria-describedby="cpf-hint cpf-error"
+                >
+                <span class="input-hint" id="cpf-hint">Somente números, 11 dígitos</span>
+                <span class="input-error" id="cpf-error" role="alert">CPF inválido. Verifique os dígitos.</span>
+            </div>
+
+            <div class="form-group">
+                <label for="input-pin">PIN</label>
+                <input
+                    type="password"
+                    id="input-pin"
+                    name="pin"
+                    inputmode="numeric"
+                    pattern="[0-9]{4}"
+                    maxlength="4"
+                    placeholder="••••"
+                    autocomplete="current-password"
+                    required
+                    aria-describedby="pin-hint pin-error"
+                >
+                <span class="input-hint" id="pin-hint">4 dígitos numéricos</span>
+                <span class="input-error" id="pin-error" role="alert">PIN inválido. Use 4 dígitos.</span>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="btn-login">
+                Entrar
+            </button>
+        </form>
+    </main>
+
+    <!-- ══════════════════════════════════════
+         TELA 2: DASHBOARD (Início)
+    ══════════════════════════════════════ -->
+    <div class="glass-card screen" id="screen-dashboard" role="main" aria-label="Dashboard Inicial">
+        <div class="calendar-header" style="margin-bottom: 0;">
+            <h2 id="greeting-dash">Olá, <span id="user-name-dash">Aluno</span>!</h2>
+            <p class="user-route" id="user-route-dash">Sua Rota</p>
+        </div>
+
+        <h3 class="dashboard-section-title">Quadro de Avisos</h3>
+        <div class="avisos-container" id="avisos-container" style="display:none;" aria-label="Mural de Avisos">
+            <!-- Populated by JS -->
+        </div>
+        <p id="sem-avisos" style="color:var(--text-secondary); font-size:0.85rem; text-align:center; display:block;">Nenhum aviso no momento.</p>
+
+        <h3 class="dashboard-section-title">Status do Ônibus</h3>
+        <div id="tracking-container" style="display:none;">
+            <!-- Populated by JS -->
+        </div>
+        <p id="sem-tracking" style="color:var(--text-secondary); font-size:0.85rem; text-align:center; display:block;">Nenhuma viagem em andamento.</p>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         TELA 2: CALENDÁRIO SEMANAL
+    ══════════════════════════════════════ -->
+    <div class="glass-card screen" id="screen-calendar" role="main" aria-label="Calendário Semanal">
+        <div class="calendar-header">
+            <h2 id="greeting">Olá, <span id="user-name">João</span>!</h2>
+            <p class="user-route" id="user-route">Cidade A → Campus</p>
+            <span class="week-label" id="week-label">Semana: 10/06 – 14/06</span>
+        </div>
+
+        <div id="days-container" role="list" aria-label="Dias da semana para reserva">
+            <!-- Populated by JS -->
+        </div>
+
+        <button type="button" class="btn btn-primary" id="btn-confirmar" style="margin-top: 1rem;">
+            Confirmar Semana
+        </button>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         TELA 3: SUCESSO
+    ══════════════════════════════════════ -->
+    <div class="glass-card screen" id="screen-success" role="main" aria-label="Reserva Confirmada">
+        <div class="success-container">
+            <div class="success-icon" aria-hidden="true">
+                <svg viewBox="0 0 80 80">
+                    <circle class="circle" cx="40" cy="40" r="35"/>
+                    <polyline class="check" points="25,42 35,52 55,30"/>
+                </svg>
+            </div>
+            <h2 class="success-title">Reserva Confirmada!</h2>
+            <p class="success-summary" id="success-summary">
+                <!-- Populated by JS -->
+            </p>
+            <div class="btn-group">
+                <button type="button" class="btn btn-secondary" id="btn-alterar">
+                    Alterar Reservas
+                </button>
+                <button type="button" class="btn btn-secondary" id="btn-sair">
+                    Sair
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav" id="bottom-nav">
+        <button class="nav-btn active" data-target="screen-dashboard">Início</button>
+        <button class="nav-btn" data-target="screen-calendar">Reservas</button>
+        <button class="nav-btn" id="btn-nav-sair">Sair</button>
+    </nav>
+
+    <script>
+    /* ══════════════════════════════════════════════
+       LÓGICA — Integrado com Backend Flask (app.py)
+       API real via fetch() conforme SCHEMA.md
+    ══════════════════════════════════════════════ */
+
+    // ── API Base URL ──
+    const API = '';
+
+    // ── State ──
+    let currentUser = null;
+    let weekDays = [];
+    let reservas = {};
+    let serverTimeOffset = 0; // diferença em ms entre servidor e cliente
+    let pendingReservas = JSON.parse(localStorage.getItem('vem_pending_reservas') || '[]');
+
+    // ── DOM Elements ──
+    const screenLogin    = document.getElementById('screen-login');
+    const screenDashboard= document.getElementById('screen-dashboard');
+    const screenCalendar = document.getElementById('screen-calendar');
+    const screenSuccess  = document.getElementById('screen-success');
+    const formLogin      = document.getElementById('form-login');
+    const inputCpf       = document.getElementById('input-cpf');
+    const inputPin       = document.getElementById('input-pin');
+    const btnLogin       = document.getElementById('btn-login');
+    const btnConfirmar   = document.getElementById('btn-confirmar');
+    const btnAlterar     = document.getElementById('btn-alterar');
+    const btnSair        = document.getElementById('btn-sair');
+    const daysContainer  = document.getElementById('days-container');
+
+    // ── Helpers ──
+    function formatCpf(value) {
+        const digits = value.replace(/\D/g, '').slice(0, 11);
+        if (digits.length <= 3) return digits;
+        if (digits.length <= 6) return digits.slice(0, 3) + '.' + digits.slice(3);
+        if (digits.length <= 9) return digits.slice(0, 3) + '.' + digits.slice(3, 6) + '.' + digits.slice(6);
+        return digits.slice(0, 3) + '.' + digits.slice(3, 6) + '.' + digits.slice(6, 9) + '-' + digits.slice(9);
+    }
+
+    function cleanCpf(value) {
+        return value.replace(/\D/g, '');
+    }
+
+    function getNextWeekdays() {
+        const days = [];
+        const dayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+        const dayNamesShort = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+        const today = new Date();
+
+        // Find next Monday (or today if Monday)
+        let start = new Date(today);
+        const dayOfWeek = start.getDay();
+        if (dayOfWeek === 0) start.setDate(start.getDate() + 1);      // Sunday → next Monday
+        else if (dayOfWeek === 6) start.setDate(start.getDate() + 2);  // Saturday → next Monday
+        else if (dayOfWeek !== 1) {
+            // If it's past Monday, still show current week remaining days
+            start.setDate(start.getDate() - (dayOfWeek - 1));
+        }
+
+        for (let i = 0; i < 5; i++) {
+            const d = new Date(start);
+            d.setDate(start.getDate() + i);
+            const dateStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+            days.push({
+                date: dateStr,
+                dayName: dayNames[d.getDay()],
+                dayShort: dayNamesShort[d.getDay()],
+                dayNum: String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0')
+            });
+        }
+        return days;
+    }
+
+    function showScreen(screen) {
+        [screenLogin, screenDashboard, screenCalendar, screenSuccess].forEach(s => s.classList.remove('active'));
+        screen.classList.add('active');
+        screen.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Focus management for accessibility
+        const firstFocusable = screen.querySelector('input, button, [tabindex]');
+        if (firstFocusable) setTimeout(() => firstFocusable.focus(), 100);
+
+        // Update nav bar active state
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            if (btn.dataset.target === screen.id) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
+
+    // Nav bar event listeners
+    document.querySelectorAll('.nav-btn[data-target]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.dataset.target;
+            showScreen(document.getElementById(targetId));
+        });
+    });
+
+    // ── Anti-burla: Sincronizar com relógio do servidor ──
+    async function syncServerTime() {
+        try {
+            const t0 = Date.now();
+            const resp = await fetch(API + '/api/server-time');
+            const t1 = Date.now();
+            const data = await resp.json();
+            const rtt = (t1 - t0) / 2;
+            const serverTs = data.timestamp * 1000 + rtt;
+            serverTimeOffset = serverTs - t1;
+            const diffMinutes = Math.abs(serverTimeOffset) / 60000;
+            if (diffMinutes > 5) {
+                console.warn(`Relógio local difere ${diffMinutes.toFixed(1)} min do servidor`);
+            }
+        } catch (e) {
+            console.warn('Não foi possível sincronizar com servidor:', e);
+            serverTimeOffset = 0;
+        }
+    }
+
+    function getServerNow() {
+        return new Date(Date.now() + serverTimeOffset);
+    }
+
+    // ── Resiliência Offline: Fila de reservas pendentes ──
+    function savePendingReservas() {
+        localStorage.setItem('vem_pending_reservas', JSON.stringify(pendingReservas));
+    }
+
+    async function syncPendingReservas() {
+        if (!navigator.onLine || pendingReservas.length === 0) return;
+        const toSync = [...pendingReservas];
+        pendingReservas = [];
+        savePendingReservas();
+
+        for (const payload of toSync) {
+            try {
+                await fetch(API + '/api/reservar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } catch (e) {
+                pendingReservas.push(payload);
+            }
+        }
+        savePendingReservas();
+    }
+
+    // Tentar sincronizar ao voltar online
+    window.addEventListener('online', () => {
+        syncPendingReservas();
+        syncServerTime();
+    });
+
+    function showError(inputEl, errorEl) {
+        inputEl.style.borderColor = 'var(--danger)';
+        errorEl.style.display = 'block';
+    }
+
+    function clearError(inputEl, errorEl) {
+        inputEl.style.borderColor = '';
+        errorEl.style.display = 'none';
+    }
+
+    // ── CPF Mask ──
+    inputCpf.addEventListener('input', function() {
+        const pos = this.selectionStart;
+        const oldLen = this.value.length;
+        this.value = formatCpf(this.value);
+        const newLen = this.value.length;
+        const newPos = pos + (newLen - oldLen);
+        this.setSelectionRange(newPos, newPos);
+    });
+
+    // ── Login ──
+    formLogin.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const cpfError = document.getElementById('cpf-error');
+        const pinError = document.getElementById('pin-error');
+        clearError(inputCpf, cpfError);
+        clearError(inputPin, pinError);
+
+        const cpf = cleanCpf(inputCpf.value);
+        const pin = inputPin.value.trim();
+
+        let hasError = false;
+
+        if (cpf.length !== 11) {
+            showError(inputCpf, cpfError);
+            hasError = true;
+        }
+        if (!/^\d{4}$/.test(pin)) {
+            showError(inputPin, pinError);
+            hasError = true;
+        }
+        if (hasError) return;
+
+        // API call to Flask backend
+        btnLogin.disabled = true;
+        btnLogin.innerHTML = '<span class="spinner"></span>Entrando...';
+
+        try {
+            const resp = await fetch(API + '/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cpf, pin })
+            });
+            const data = await resp.json();
+
+            if (!data.sucesso) {
+                btnLogin.disabled = false;
+                btnLogin.textContent = 'Entrar';
+                cpfError.textContent = data.erro || 'CPF ou PIN incorretos.';
+                showError(inputCpf, cpfError);
+                return;
+            }
+
+            // Login success
+            currentUser = { cpf, ...data.aluno };
+            console.log('Login de ' + data.aluno.nome + ' (CPF: ' + cpf + ')');
+            
+            // Popular headers
+            const firstName = currentUser.nome.split(' ')[0];
+            document.getElementById('user-name').textContent = firstName;
+            document.getElementById('user-route').textContent = currentUser.rota;
+            document.getElementById('user-name-dash').textContent = firstName;
+            document.getElementById('user-route-dash').textContent = currentUser.rota;
+
+            document.getElementById('bottom-nav').classList.add('active');
+            
+            carregarAvisos();
+            iniciarPollingTracking();
+            loadCalendar(); // Carrega os dados silenciosamente
+            showScreen(screenDashboard); // Mostra o painel inicial
+        } catch (err) {
+            btnLogin.disabled = false;
+            btnLogin.textContent = 'Entrar';
+            cpfError.textContent = 'Erro de conexao. Verifique o servidor.';
+            showError(inputCpf, cpfError);
+            console.error('Erro no login:', err);
+        }
+    });
+
+    // ── Calendar ──
+    async function loadCalendar() {
+        // Sincronizar relógio com servidor (anti-burla)
+        await syncServerTime();
+        // Sincronizar reservas pendentes offline
+        await syncPendingReservas();
+
+        weekDays = getNextWeekdays();
+
+        document.getElementById('week-label').textContent =
+            'Semana: ' + weekDays[0].dayNum + ' – ' + weekDays[4].dayNum;
+
+        // Init reservas
+        weekDays.forEach(d => {
+            if (!reservas[d.date]) {
+                reservas[d.date] = { ida: false, volta: false };
+            }
+        });
+
+        // Carregar reservas existentes do backend
+        try {
+            const resp = await fetch(API + '/api/semana?cpf=' + currentUser.cpf);
+            const data = await resp.json();
+            if (data.semana) {
+                data.semana.forEach(r => {
+                    reservas[r.data] = { ida: !!r.ida, volta: !!r.volta };
+                });
+            }
+        } catch (err) {
+            console.error('Erro ao carregar semana:', err);
+        }
+
+        renderDays();
+    }
+
+    function renderDays() {
+        daysContainer.innerHTML = '';
+        
+        const serverNow = getServerNow();
+        const serverHojeStr = serverNow.getFullYear() + '-' + String(serverNow.getMonth() + 1).padStart(2, '0') + '-' + String(serverNow.getDate()).padStart(2, '0');
+        const serverHora = serverNow.getHours();
+        
+        weekDays.forEach(day => {
+            const r = reservas[day.date];
+            
+            let isLocked = false;
+            if (day.date < serverHojeStr) {
+                isLocked = true;
+            } else if (day.date === serverHojeStr && serverHora >= 14) {
+                isLocked = true;
+            }
+
+            const card = document.createElement('div');
+            card.className = 'day-card';
+            card.setAttribute('role', 'listitem');
+            
+            let togglesHtml = '';
+            if (isLocked) {
+                togglesHtml = `
+                    <div style="font-size: 0.8rem; font-weight: 700; color: var(--danger); padding-right: 0.5rem; text-transform: uppercase;">
+                        Encerrado
+                    </div>
+                `;
+            } else {
+                togglesHtml = `
+                    <button type="button"
+                        class="toggle-btn"
+                        data-date="${day.date}"
+                        data-direction="ida"
+                        role="switch"
+                        aria-checked="${r.ida}"
+                        aria-pressed="${r.ida}"
+                        aria-label="Ida ${day.dayName}"
+                        title="Ida">
+                        <span class="toggle-icon" aria-hidden="true">→</span>
+                        IDA
+                    </button>
+                    <button type="button"
+                        class="toggle-btn"
+                        data-date="${day.date}"
+                        data-direction="volta"
+                        role="switch"
+                        aria-checked="${r.volta}"
+                        aria-pressed="${r.volta}"
+                        aria-label="Volta ${day.dayName}"
+                        title="Volta">
+                        <span class="toggle-icon" aria-hidden="true">←</span>
+                        VOLTA
+                    </button>
+                `;
+            }
+
+            card.innerHTML = `
+                <div class="day-info">
+                    <div class="day-name">${day.dayName}</div>
+                    <div class="day-date">${day.dayNum}</div>
+                </div>
+                <div class="toggles">
+                    ${togglesHtml}
+                </div>
+            `;
+            daysContainer.appendChild(card);
+        });
+
+        // Toggle event delegation
+        daysContainer.querySelectorAll('.toggle-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const date = this.dataset.date;
+                const dir = this.dataset.direction;
+                reservas[date][dir] = !reservas[date][dir];
+                const pressed = reservas[date][dir].toString();
+                this.setAttribute('aria-pressed', pressed);
+                this.setAttribute('aria-checked', pressed);
+            });
+        });
+    }
+
+    // ── Confirm Week ──
+    btnConfirmar.addEventListener('click', async function() {
+        const selected = weekDays.filter(d => reservas[d.date].ida || reservas[d.date].volta);
+
+        if (selected.length === 0) {
+            // Visual feedback — shake button
+            btnConfirmar.style.animation = 'none';
+            btnConfirmar.offsetHeight; // force reflow
+            btnConfirmar.style.animation = 'shake 0.4s ease-in-out';
+            return;
+        }
+
+        btnConfirmar.disabled = true;
+        btnConfirmar.innerHTML = '<span class="spinner"></span>Confirmando...';
+
+        // API call to Flask backend
+        const payload = {
+            cpf: currentUser.cpf,
+            reservas: weekDays.map(d => ({
+                data: d.date,
+                ida: reservas[d.date].ida ? 1 : 0,
+                volta: reservas[d.date].volta ? 1 : 0
+            })).filter(r => r.ida || r.volta)
+        };
+
+        try {
+            const resp = await fetch(API + '/api/reservar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await resp.json();
+
+            if (data.sucesso) {
+                console.log('Reservas salvas: ' + data.total_registradas + ' dias');
+                showSuccess(selected);
+            } else {
+                btnConfirmar.disabled = false;
+                btnConfirmar.textContent = 'Confirmar Semana';
+                alert(data.erro || 'Erro ao salvar reservas.');
+            }
+        } catch (err) {
+            // Modo offline: enfileirar para sincronização posterior
+            if (!navigator.onLine) {
+                pendingReservas.push(payload);
+                savePendingReservas();
+                console.log('Reserva enfileirada para sincronização offline');
+                showSuccess(selected);
+            } else {
+                btnConfirmar.disabled = false;
+                btnConfirmar.textContent = 'Confirmar Semana';
+                alert('Erro de conexao. Verifique o servidor.');
+                console.error('Erro ao reservar:', err);
+            }
+        }
+    });
+
+    // ── Shake animation for empty submit ──
+    const shakeStyle = document.createElement('style');
+    shakeStyle.textContent = `
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+    `;
+    document.head.appendChild(shakeStyle);
+
+    // ── Success Screen ──
+    function showSuccess(selectedDays) {
+        let summaryHtml = 'Você reservou viagens para:<br>';
+        selectedDays.forEach(day => {
+            const r = reservas[day.date];
+            let label = '';
+            if (r.ida && r.volta) label = 'Ida e Volta';
+            else if (r.ida) label = 'Somente Ida';
+            else label = 'Somente Volta';
+            summaryHtml += `<span class="day-chip">${day.dayShort} ${day.dayNum} — ${label}</span> `;
+        });
+
+        document.getElementById('success-summary').innerHTML = summaryHtml;
+        showScreen(screenSuccess);
+    }
+
+    // ── Navigation: Alterar ──
+    btnAlterar.addEventListener('click', function() {
+        btnConfirmar.disabled = false;
+        btnConfirmar.textContent = 'Confirmar Semana';
+        showScreen(screenCalendar);
+    });
+
+    // ── Navigation: Sair ──
+    document.getElementById('btn-nav-sair').addEventListener('click', sair);
+    btnSair.addEventListener('click', sair);
+
+    function sair() {
+        currentUser = null;
+        reservas = {};
+        inputCpf.value = '';
+        inputPin.value = '';
+        btnLogin.disabled = false;
+        btnLogin.textContent = 'Entrar';
+        btnConfirmar.disabled = false;
+        btnConfirmar.textContent = 'Confirmar Semana';
+        
+        document.getElementById('bottom-nav').classList.remove('active');
+        
+        // Limpar avisos e tracking
+        document.getElementById('avisos-container').style.display = 'none';
+        document.getElementById('avisos-container').innerHTML = '';
+        document.getElementById('sem-avisos').style.display = 'block';
+        document.getElementById('tracking-container').style.display = 'none';
+        document.getElementById('tracking-container').innerHTML = '';
+        document.getElementById('sem-tracking').style.display = 'block';
+        if (trackingInterval) { clearInterval(trackingInterval); trackingInterval = null; }
+        showScreen(screenLogin);
+    }
+
+    // ══════════════════════════════════════
+    // AVISOS (Requisito A: Mural de Avisos)
+    // ══════════════════════════════════════
+
+    async function carregarAvisos() {
+        try {
+            const resp = await fetch(API + '/api/avisos');
+            const data = await resp.json();
+            const container = document.getElementById('avisos-container');
+
+            if (!data.avisos || data.avisos.length === 0) {
+                container.style.display = 'none';
+                document.getElementById('sem-avisos').style.display = 'block';
+                return;
+            }
+
+            container.innerHTML = '';
+            container.style.display = 'flex';
+            document.getElementById('sem-avisos').style.display = 'none';
+
+            data.avisos.forEach(aviso => {
+                const tipoClass = aviso.tipo === 'URGENTE' ? 'aviso-urgente' : 'aviso-info';
+                const tipoLabel = aviso.tipo === 'URGENTE' ? '⚠️ Urgente' : 'ℹ️ Informativo';
+                const dataFormatada = new Date(aviso.criado_em).toLocaleDateString('pt-BR', {
+                    day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
+                });
+
+                const banner = document.createElement('div');
+                banner.className = `aviso-banner ${tipoClass}`;
+                banner.innerHTML = `
+                    <div class="aviso-tipo">${tipoLabel}</div>
+                    <div class="aviso-titulo">${aviso.titulo}</div>
+                    <div class="aviso-mensagem">${aviso.mensagem}</div>
+                    <div class="aviso-data">${dataFormatada}</div>
+                `;
+                container.appendChild(banner);
+            });
+        } catch (e) {
+            console.warn('Erro ao carregar avisos:', e);
+        }
+    }
+
+    // ══════════════════════════════════════
+    // STATUS DE VIAGEM (Requisito B)
+    // ══════════════════════════════════════
+
+    let trackingInterval = null;
+
+    async function carregarTracking() {
+        try {
+            const hoje = new Date().toISOString().split('T')[0];
+            const hora = new Date().getHours();
+            // Antes das 13h mostra IDA, depois mostra VOLTA
+            const tipo = hora < 13 ? 'IDA' : 'VOLTA';
+
+            const resp = await fetch(API + `/api/status-viagem/${hoje}?tipo=${tipo}`);
+            const data = await resp.json();
+            const container = document.getElementById('tracking-container');
+
+            if (!data.viagens || data.viagens.length === 0) {
+                container.style.display = 'none';
+                document.getElementById('sem-tracking').style.display = 'block';
+                return;
+            }
+
+            container.innerHTML = '';
+            container.style.display = 'block';
+            document.getElementById('sem-tracking').style.display = 'none';
+
+            data.viagens.forEach(viagem => {
+                const card = document.createElement('div');
+                card.className = 'tracking-card';
+
+                // Determine status badge class
+                let badgeClass = 'aguardando';
+                let badgeText = 'Aguardando';
+                if (viagem.status === 'EM_ROTA') {
+                    badgeClass = 'em-rota';
+                    badgeText = '● Em rota';
+                } else if (viagem.status === 'FINALIZADA') {
+                    badgeClass = 'finalizada';
+                    badgeText = '✓ Chegou';
+                }
+
+                // Progress calculation
+                const progress = viagem.total_pontos > 0
+                    ? (viagem.ponto_ordem_atual / viagem.total_pontos) * 100
+                    : 0;
+
+                // Generate progress dots
+                let dotsHTML = '';
+                let labelsHTML = '';
+                // We need to fetch points names — use minimal rendering
+                for (let i = 1; i <= viagem.total_pontos; i++) {
+                    let pointClass = '';
+                    if (i < viagem.ponto_ordem_atual) pointClass = 'passed';
+                    else if (i === viagem.ponto_ordem_atual) pointClass = 'current';
+                    dotsHTML += `<div class="tracking-point ${pointClass}"></div>`;
+                }
+
+                // Time formatting
+                const atualizado = viagem.atualizado_em
+                    ? new Date(viagem.atualizado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+                    : '--:--';
+
+                const pontoInfo = viagem.ponto_atual
+                    ? `📍 <span class="ponto-atual">${viagem.ponto_atual}</span>`
+                    : 'Aguardando partida';
+
+                const proximoInfo = viagem.proximo_ponto
+                    ? `Próxima: ${viagem.proximo_ponto}`
+                    : (viagem.status === 'FINALIZADA' ? '✅ Destino alcançado' : '');
+
+                card.innerHTML = `
+                    <div class="tracking-header">
+                        <h3>🚌 ${viagem.veiculo_id} — ${viagem.tipo}</h3>
+                        <span class="tracking-status-badge ${badgeClass}">${badgeText}</span>
+                    </div>
+                    <div class="tracking-progress">
+                        <div class="tracking-progress-line"></div>
+                        <div class="tracking-progress-fill" style="width: ${progress}%;"></div>
+                        ${dotsHTML}
+                    </div>
+                    <div class="tracking-info">
+                        <span>${pontoInfo}</span>
+                        <span>${atualizado}</span>
+                    </div>
+                    ${proximoInfo ? `<div class="tracking-info" style="margin-top:0.25rem;"><span style="font-size:0.72rem;opacity:0.8;">${proximoInfo}</span></div>` : ''}
+                `;
+                container.appendChild(card);
+            });
+
+            // Stop polling if all trips are FINALIZADA
+            const allDone = data.viagens.every(v => v.status === 'FINALIZADA');
+            if (allDone && trackingInterval) {
+                clearInterval(trackingInterval);
+                trackingInterval = null;
+            }
+        } catch (e) {
+            console.warn('Erro ao carregar tracking:', e);
+        }
+    }
+
+    function iniciarPollingTracking() {
+        // Primeira carga imediata
+        carregarTracking();
+        // Polling a cada 30 segundos
+        if (trackingInterval) clearInterval(trackingInterval);
+        trackingInterval = setInterval(carregarTracking, 30000);
+    }
+
+    // ── PWA: Register Service Worker ──
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('sw.js')
+                .then(function() { console.log('🔧 Service Worker registrado'); })
+                .catch(function() { console.log('⚠️ Service Worker indisponível'); });
+        });
+    }
+    </script>
+</body>
+</html>

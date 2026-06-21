@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="VEM — Terminal do Motorista. Confirmação física de embarque e controle de assentos.">
+    <meta name="theme-color" content="#0f0c29">
+    <title>VEM — Terminal do Motorista</title>
+    <style>
+        /* ══════════════════════════════════════════════
+           DESIGN SYSTEM — Glassmorphism Premium Mobile
+           Paleta: Deep Blue → Dark Purple
+           Mobile-First | Offline-First | Touch Targets ≥ 48px
+        ══════════════════════════════════════════════ */
+
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-start: #001f3f;
+            --bg-mid: #003366;
+            --bg-end: #001a35;
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --glass-shadow: rgba(0, 0, 0, 0.3);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --accent: #f39c12;
+            --accent-glow: rgba(243, 156, 18, 0.4);
+            --accent-hover: #e67e22;
+            --success: #00c896;
+            --success-glow: rgba(0, 200, 150, 0.3);
+            --danger: #ff6b6b;
+            --warning: #ffb74d;
+            --radius: 16px;
+            --radius-sm: 12px;
+            --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+        }
+
+        html {
+            font-size: 16px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: var(--font);
+            background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-mid) 50%, var(--bg-end) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 1rem;
+            overflow-x: hidden;
+        }
+
+        /* Background blur elements */
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.25;
+            z-index: 0;
+            pointer-events: none;
+        }
+        body::before {
+            width: 300px;
+            height: 300px;
+            background: var(--accent);
+            top: -50px;
+            right: -50px;
+            animation: float-orb 10s ease-in-out infinite alternate;
+        }
+        body::after {
+            width: 250px;
+            height: 250px;
+            background: #e040fb;
+            bottom: -50px;
+            left: -50px;
+            animation: float-orb 12s ease-in-out infinite alternate-reverse;
+        }
+
+        @keyframes float-orb {
+            0%   { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(20px, -30px) scale(1.1); }
+        }
+
+        /* ── Glass Card Container ── */
+        .glass-card {
+            position: relative;
+            z-index: 1;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            box-shadow: 0 8px 32px var(--glass-shadow);
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 450px;
+            margin-bottom: 1rem;
+        }
+
+        /* ── Header & Screen Transition ── */
+        .screen {
+            display: none;
+            animation: fadeSlideIn 0.35s ease-out;
+        }
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .logo-icon {
+            font-size: 2.2rem;
+            margin-bottom: 0.25rem;
+            display: block;
+        }
+        .logo h1 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .header-section h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        /* ── Forms & Controls ── */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.3rem;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            min-height: 48px;
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            outline: none;
+            transition: all var(--transition);
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        /* ── Fix: Alto contraste em dropdowns nativos ── */
+        .form-group select option {
+            background: #1a1a2e;
+            color: #f0f0f5;
+        }
+        .form-group select option:checked {
+            background: #302b63;
+            color: #fff;
+        }
+
+        /* Status Indicator (Offline Badge) */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 8px;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
+        }
+        .network-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 5px;
+        }
+        .net-online {
+            background: rgba(0, 200, 150, 0.15);
+            color: var(--success);
+        }
+        .net-offline {
+            background: rgba(255, 107, 107, 0.15);
+            color: var(--danger);
+        }
+
+        /* Capacity and Counters */
+        .capacity-card {
+            background: rgba(108, 99, 255, 0.12);
+            border: 1px solid rgba(108, 99, 255, 0.2);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 1rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        .capacity-title {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+        }
+        .capacity-val {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin: 0.2rem 0;
+        }
+
+        /* ── Passenger List ── */
+        .passenger-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 0.25rem;
+        }
+        .passenger-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-sm);
+            transition: all var(--transition);
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .passenger-item.confirmed {
+            background: rgba(0, 200, 150, 0.08);
+            border-color: rgba(0, 200, 150, 0.25);
+        }
+        .p-info {
+            flex: 1;
+            min-width: 0;
+            margin-right: 0.5rem;
+        }
+        .p-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .p-meta {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.15rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+        .tag-excecao {
+            color: var(--warning);
+            font-weight: 700;
+        }
+
+        /* Touch Check-in Action */
+        .checkin-btn {
+            min-width: 48px;
+            min-height: 48px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+        .passenger-item.confirmed .checkin-btn {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+            box-shadow: 0 0 10px var(--success-glow);
+        }
+
+        /* ── Buttons ── */
+        .btn {
+            display: block;
+            width: 100%;
+            min-height: 48px;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition);
+            text-align: center;
+            letter-spacing: 0.3px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            color: #fff;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .btn-secondary:active {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .alert-error {
+            font-size: 0.8rem;
+            color: var(--danger);
+            margin-bottom: 0.8rem;
+            display: none;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ── PÁGINA 1: LOGIN MOTORISTA ── -->
+    <div id="screen-login" class="glass-card screen active">
+        <div class="logo">
+            <span class="logo-icon">🚌</span>
+            <h1>Terminal do Motorista</h1>
+            <p>Controle de embarque físico VEM</p>
+        </div>
+        <div class="form-group">
+            <label for="login-token">Token do Motorista</label>
+            <input type="password" id="login-token" placeholder="Digite o token do sistema">
+        </div>
+        <div id="login-error" class="alert-error">Chave de acesso inválida.</div>
+        <button class="btn btn-primary" onclick="tentarLogin()">Confirmar Acesso</button>
+    </div>
+
+    <!-- ── PÁGINA 2: CONFIGURAÇÃO DE VIAGEM ── -->
+    <div id="screen-setup" class="glass-card screen">
+        <div class="header-section">
+            <h2>Configurar Viagem</h2>
+            <button class="btn btn-secondary" style="min-height:36px; padding:0.4rem 0.8rem; width:auto; font-size:0.8rem;" onclick="logout()">Sair</button>
+        </div>
+        <div class="form-group">
+            <label for="setup-date">Data</label>
+            <input type="date" id="setup-date">
+        </div>
+        <div class="form-group">
+            <label for="setup-type">Turno (Trecho)</label>
+            <select id="setup-type">
+                <option value="IDA">IDA (Cidade -> Campus)</option>
+                <option value="VOLTA">VOLTA (Campus -> Cidade)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="setup-vehicle">Selecione o Veículo</label>
+            <select id="setup-vehicle">
+                <!-- Populado dinamicamente -->
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="setup-rota">Rota (Para Rastreamento)</label>
+            <select id="setup-rota">
+                <!-- Populado dinamicamente -->
+                <option value="">Carregando rotas...</option>
+            </select>
+        </div>
+        <button class="btn btn-primary" onclick="iniciarViagem()">Iniciar Embarque</button>
+    </div>
+
+    <!-- ── PÁGINA 3: LISTA DE EMBARQUE (CHECKLIST) ── -->
+    <div id="screen-checklist" class="glass-card screen">
+        <div class="header-section">
+            <div>
+                <h2 id="checklist-title">Checklist</h2>
+                <span id="checklist-subtitle" style="font-size:0.75rem; color:var(--text-secondary);"></span>
+            </div>
+            <button class="btn btn-secondary" style="min-height:36px; padding:0.4rem 0.8rem; width:auto; font-size:0.8rem;" onclick="voltarParaSetup()">Voltar</button>
+        </div>
+
+        <div class="status-bar">
+            <span>Conexão:</span>
+            <span id="net-badge" class="network-badge net-online">Online</span>
+            <button id="sync-btn" class="btn btn-secondary" style="min-height:30px; padding:0.2rem 0.5rem; width:auto; font-size:0.7rem; display:none;" onclick="forcarSincronizacao()">Sincronizar</button>
+        </div>
+
+        <div class="capacity-card">
+            <div class="capacity-title">Ocupação do Veículo</div>
+            <div class="capacity-val" id="capacity-count">0 / 0</div>
+            <span id="capacity-msg" style="font-size:0.75rem; color:var(--text-secondary);">Aguardando embarque</span>
+        </div>
+
+        <div class="capacity-card" id="tracking-panel" style="display:none; text-align:left;">
+            <div class="capacity-title" style="margin-bottom: 0.75rem; text-align:center;">Posição do Veículo</div>
+            <div id="tracking-points" style="display: flex; flex-direction: column; gap: 0.4rem;">
+                <!-- Botões de tracking -->
+            </div>
+            <div style="font-size:0.7rem; color:var(--text-secondary); text-align:center; margin-top:0.5rem;">
+                Toque no ponto ao passar por ele
+            </div>
+        </div>
+
+        <div class="passenger-list" id="passenger-list">
+            <!-- Populado via JS -->
+        </div>
+    </div>
+
+    <script>
+        let adminToken = localStorage.getItem("adminToken") || "";
+        let veiculos = [];
+        let checklistPassageiros = [];
+        let veiculoSelecionado = null;
+        let viagemConfig = {};
+        let pontosRota = [];
+
+        // Fila de sincronização offline
+        let checkinQueue = JSON.parse(localStorage.getItem("checkinQueue")) || [];
+
+        document.addEventListener("DOMContentLoaded", () => {
+            // Configurar data padrão como hoje
+            const hoje = new Date().toISOString().split("T")[0];
+            document.getElementById("setup-date").value = hoje;
+
+            // Monitor de rede
+            window.addEventListener("online", atualizarStatusConexao);
+            window.addEventListener("offline", atualizarStatusConexao);
+            atualizarStatusConexao();
+
+            if (adminToken) {
+                mostrarSetup();
+            }
+        });
+
+        function atualizarStatusConexao() {
+            const badge = document.getElementById("net-badge");
+            const syncBtn = document.getElementById("sync-btn");
+            if (navigator.onLine) {
+                badge.textContent = "Online";
+                badge.className = "network-badge net-online";
+                if (checkinQueue.length > 0) {
+                    syncBtn.style.display = "block";
+                    sincronizarFila();
+                } else {
+                    syncBtn.style.display = "none";
+                }
+            } else {
+                badge.textContent = "Offline";
+                badge.className = "network-badge net-offline";
+                syncBtn.style.display = "none";
+            }
+        }
+
+        function tentarLogin() {
+            const tokenInput = document.getElementById("login-token").value.trim();
+            if (!tokenInput) return;
+
+            fetch("/api/veiculos", {
+                headers: { "X-Admin-Token": tokenInput }
+            })
+            .then(res => {
+                if (res.ok) {
+                    adminToken = tokenInput;
+                    localStorage.setItem("adminToken", adminToken);
+                    document.getElementById("login-error").style.display = "none";
+                    mostrarSetup();
+                } else {
+                    document.getElementById("login-error").style.display = "block";
+                }
+            })
+            .catch(() => {
+                document.getElementById("login-error").style.display = "block";
+            });
+        }
+
+        function logout() {
+            localStorage.removeItem("adminToken");
+            adminToken = "";
+            document.getElementById("screen-setup").classList.remove("active");
+            document.getElementById("screen-login").classList.add("active");
+            document.getElementById("login-token").value = "";
+        }
+
+        function mostrarSetup() {
+            document.getElementById("screen-login").classList.remove("active");
+            document.getElementById("screen-setup").classList.add("active");
+            carregarVeiculos();
+            carregarRotasDisponiveis();
+        }
+
+        function carregarVeiculos() {
+            fetch("/api/veiculos", {
+                headers: { "X-Admin-Token": adminToken }
+            })
+            .then(res => res.json())
+            .then(data => {
+                veiculos = data;
+                const select = document.getElementById("setup-vehicle");
+                select.innerHTML = "";
+                data.forEach(v => {
+                    const opt = document.createElement("option");
+                    opt.value = v.id;
+                    opt.textContent = `${v.id} (${v.tipo} - ${v.capacidade} assentos)`;
+                    select.appendChild(opt);
+                });
+            });
+        }
+
+        function carregarRotasDisponiveis() {
+            fetch("/api/pontos-rota", {
+                headers: { "X-Admin-Token": adminToken }
+            })
+            .then(res => res.json())
+            .then(data => {
+                pontosRota = data.pontos || [];
+                const select = document.getElementById("setup-rota");
+                select.innerHTML = '<option value="">Sem Rastreamento</option>';
+                const rotasUnicas = [...new Set(pontosRota.map(p => p.rota))];
+                rotasUnicas.forEach(r => {
+                    const opt = document.createElement("option");
+                    opt.value = r;
+                    opt.textContent = r;
+                    select.appendChild(opt);
+                });
+            })
+            .catch(() => {
+                document.getElementById("setup-rota").innerHTML = '<option value="">Erro ao carregar</option>';
+            });
+        }
+
+        function voltarParaSetup() {
+            document.getElementById("screen-checklist").classList.remove("active");
+            document.getElementById("screen-setup").classList.add("active");
+        }
+
+        function iniciarViagem() {
+            const dataVal = document.getElementById("setup-date").value;
+            const tipoVal = document.getElementById("setup-type").value;
+            const veiculoVal = document.getElementById("setup-vehicle").value;
+
+            if (!dataVal || !veiculoVal) return;
+
+            veiculoSelecionado = veiculos.find(v => v.id === veiculoVal);
+            const rotaVal = document.getElementById("setup-rota").value;
+            viagemConfig = { data: dataVal, tipo: tipoVal, veiculo_id: veiculoVal, rota: rotaVal };
+
+            document.getElementById("checklist-title").textContent = `Embarque ${tipoVal}`;
+            document.getElementById("checklist-subtitle").textContent = `${veiculoVal} | ${dataVal.split("-").reverse().join("/")}`;
+
+            document.getElementById("screen-setup").classList.remove("active");
+            document.getElementById("screen-checklist").classList.add("active");
+
+            carregarChecklist();
+            renderizarTrackingControls();
+        }
+
+        function renderizarTrackingControls() {
+            const panel = document.getElementById("tracking-panel");
+            const container = document.getElementById("tracking-points");
+            
+            if (!viagemConfig.rota) {
+                panel.style.display = "none";
+                return;
+            }
+            
+            panel.style.display = "block";
+            container.innerHTML = "";
+            
+            const pontos = pontosRota.filter(p => p.rota === viagemConfig.rota).sort((a,b) => a.ordem - b.ordem);
+            pontos.forEach(p => {
+                const btn = document.createElement("button");
+                btn.className = "btn btn-secondary";
+                btn.style.minHeight = "40px";
+                btn.style.padding = "0.5rem";
+                btn.style.fontSize = "0.85rem";
+                btn.style.textAlign = "left";
+                btn.innerHTML = `<span style="display:inline-block; width:20px; text-align:center; margin-right:5px; color:var(--text-secondary);">📍</span> ${p.ordem}. ${p.nome}`;
+                btn.onclick = () => atualizarStatusViagem(p.id, btn);
+                container.appendChild(btn);
+            });
+        }
+
+        function atualizarStatusViagem(ponto_id, btn) {
+            if (!navigator.onLine) {
+                alert("Necessário conexão com a internet para atualizar localização.");
+                return;
+            }
+            
+            btn.innerHTML = `⏳ Atualizando...`;
+            
+            fetch("/api/status-viagem", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json", "X-Admin-Token": adminToken },
+                body: JSON.stringify({
+                    veiculo_id: viagemConfig.veiculo_id,
+                    data: viagemConfig.data,
+                    tipo: viagemConfig.tipo,
+                    ponto_id: ponto_id
+                })
+            }).then(r => r.json()).then(d => {
+                if(d.sucesso) {
+                    const btns = document.getElementById("tracking-points").querySelectorAll("button");
+                    btns.forEach(b => {
+                        b.style.background = "rgba(255, 255, 255, 0.08)";
+                        b.style.borderColor = "rgba(255, 255, 255, 0.1)";
+                        b.style.color = "var(--text-primary)";
+                        if(b.innerHTML.includes("Atualizando")) {
+                             // reset text
+                             const pid = b.getAttribute("data-pid");
+                             const pt = pontosRota.find(x => x.id === pid);
+                             if(pt) b.innerHTML = `<span style="display:inline-block; width:20px; text-align:center; margin-right:5px; color:var(--text-secondary);">📍</span> ${pt.ordem}. ${pt.nome}`;
+                        }
+                    });
+                    btn.style.background = "rgba(0, 200, 150, 0.2)";
+                    btn.style.borderColor = "var(--success)";
+                    btn.style.color = "var(--success)";
+                    
+                    const pt = pontosRota.find(x => x.id === ponto_id);
+                    btn.innerHTML = `<span style="display:inline-block; width:20px; text-align:center; margin-right:5px;">✅</span> ${pt.ordem}. ${pt.nome}`;
+                    btn.setAttribute("data-pid", ponto_id);
+                } else {
+                    alert(d.erro);
+                    const pt = pontosRota.find(x => x.id === ponto_id);
+                    btn.innerHTML = `<span style="display:inline-block; width:20px; text-align:center; margin-right:5px; color:var(--text-secondary);">📍</span> ${pt.ordem}. ${pt.nome}`;
+                }
+            }).catch(() => {
+                alert("Erro de conexão ao atualizar localização.");
+                const pt = pontosRota.find(x => x.id === ponto_id);
+                btn.innerHTML = `<span style="display:inline-block; width:20px; text-align:center; margin-right:5px; color:var(--text-secondary);">📍</span> ${pt.ordem}. ${pt.nome}`;
+            });
+        }
+
+        function carregarChecklist() {
+            fetch(`/api/checklist/${viagemConfig.data}?tipo=${viagemConfig.tipo}`, {
+                headers: { "X-Admin-Token": adminToken }
+            })
+            .then(res => res.json())
+            .then(data => {
+                checklistPassageiros = data.passageiros || [];
+                renderizarChecklist();
+            });
+        }
+
+        function renderizarChecklist() {
+            const container = document.getElementById("passenger-list");
+            container.innerHTML = "";
+
+            let confirmadosCount = checklistPassageiros.filter(p => p.checkin).length;
+            atualizarContadorOcupacao(confirmadosCount);
+
+            if (checklistPassageiros.length === 0) {
+                container.innerHTML = `<div style="text-align: center; color: var(--text-secondary); padding: 2rem;">Nenhum passageiro reservado.</div>`;
+                return;
+            }
+
+            checklistPassageiros.forEach(p => {
+                // Verificar se há check-in offline pendente para este passageiro
+                const pendenteOffline = checkinQueue.some(item => 
+                    item.cpf === p.cpf && 
+                    item.data === viagemConfig.data && 
+                    item.tipo === viagemConfig.tipo
+                );
+
+                const estaConfirmado = p.checkin || pendenteOffline;
+
+                const item = document.createElement("div");
+                item.className = `passenger-item ${estaConfirmado ? 'confirmed' : ''}`;
+                
+                const badgeExcecao = p.tipo_vaga === "EXCECAO" 
+                    ? `<span class="tag-excecao">[EXCEÇÃO]</span>` 
+                    : "";
+
+                item.innerHTML = `
+                    <div class="p-info">
+                        <div class="p-name">${p.nome}</div>
+                        <div class="p-meta">
+                            <span>CPF: ${p.cpf.substring(0,3)}...</span>
+                            ${badgeExcecao}
+                            ${pendenteOffline ? '<span style="color:var(--accent);">Sincronizando...</span>' : ''}
+                        </div>
+                    </div>
+                    <button class="checkin-btn" onclick="realizarCheckin('${p.cpf}', ${estaConfirmado})">
+                        ${estaConfirmado ? '✓' : '+'}
+                    </button>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function atualizarContadorOcupacao(confirmados) {
+            const total = veiculoSelecionado ? veiculoSelecionado.capacidade : 0;
+            document.getElementById("capacity-count").textContent = `${confirmados} / ${total}`;
+
+            const percent = total > 0 ? (confirmados / total) * 100 : 0;
+            const msg = document.getElementById("capacity-msg");
+            if (percent >= 100) {
+                msg.textContent = "Veículo LOTADO!";
+                msg.style.color = "var(--danger)";
+            } else if (percent >= 80) {
+                msg.textContent = "Capacidade quase esgotada";
+                msg.style.color = "var(--warning)";
+            } else {
+                msg.textContent = "Assentos disponíveis";
+                msg.style.color = "var(--success)";
+            }
+        }
+
+        function realizarCheckin(cpf, jaConfirmado) {
+            if (jaConfirmado) {
+                alert("Embarque já confirmado. Não é possível reverter pelo terminal do motorista.");
+                return;
+            }
+
+            // Validar capacidade antes de aceitar localmente
+            let confirmadosCount = checklistPassageiros.filter(p => p.checkin).length + checkinQueue.length;
+            if (confirmadosCount >= veiculoSelecionado.capacidade) {
+                alert("Veículo lotado! Check-in rejeitado.");
+                return;
+            }
+
+            const novoCheckin = {
+                cpf: cpf,
+                veiculo_id: viagemConfig.veiculo_id,
+                data: viagemConfig.data,
+                tipo: viagemConfig.tipo
+            };
+
+            // Atualização otimista na UI
+            const idx = checklistPassageiros.findIndex(p => p.cpf === cpf);
+            if (idx !== -1) {
+                checklistPassageiros[idx].checkin = true;
+                renderizarChecklist();
+            }
+
+            if (navigator.onLine) {
+                enviarCheckinBackend(novoCheckin);
+            } else {
+                // Modo Offline: Adicionar à fila e salvar no localStorage
+                checkinQueue.push(novoCheckin);
+                localStorage.setItem("checkinQueue", JSON.stringify(checkinQueue));
+                atualizarStatusConexao();
+                renderizarChecklist();
+            }
+        }
+
+        function enviarCheckinBackend(checkinObj) {
+            fetch("/api/checkin", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Admin-Token": adminToken
+                },
+                body: JSON.stringify(checkinObj)
+            })
+            .then(res => {
+                if (res.ok) {
+                    carregarChecklist(); // Recarregar para garantir sincronia
+                } else {
+                    res.json().then(err => {
+                        alert(`Erro no check-in: ${err.erro}`);
+                        // Reverter na UI se falhou
+                        carregarChecklist();
+                    });
+                }
+            })
+            .catch(() => {
+                // Falhou por rede no meio da transação -> Enfilera
+                checkinQueue.push(checkinObj);
+                localStorage.setItem("checkinQueue", JSON.stringify(checkinQueue));
+                atualizarStatusConexao();
+                renderizarChecklist();
+            });
+        }
+
+        function sincronizarFila() {
+            if (!navigator.onLine || checkinQueue.length === 0) return;
+
+            const promises = checkinQueue.map(item => {
+                return fetch("/api/checkin", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Admin-Token": adminToken
+                    },
+                    body: JSON.stringify(item)
+                });
+            });
+
+            Promise.allSettled(promises).then(() => {
+                // Limpa fila e recarrega
+                checkinQueue = [];
+                localStorage.removeItem("checkinQueue");
+                atualizarStatusConexao();
+                carregarChecklist();
+            });
+        }
+
+        function forcarSincronizacao() {
+            sincronizarFila();
+        }
+    </script>
+</body>
+</html>

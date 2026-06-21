@@ -1,0 +1,14 @@
+{
+    "Total_Time_Seconds": 0.53,
+    "Successful_Requests": 0,
+    "Failed_Requests": 100,
+    "Average_Time_Per_Request": 0.3031,
+    "Max_Time": 0.3923,
+    "Min_Time": 0.1963,
+    "Errors": [
+        {
+            "Error": "HTTP 409: {\n  \"erro\": \"CPF ja cadastrado e ativo\",\n  \"sucesso\": false\n}\n",
+            "Count": 100
+        }
+    ]
+}

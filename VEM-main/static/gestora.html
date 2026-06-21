@@ -1,0 +1,2585 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="VEM — Painel de Controle da Gestora. Gerencie e dimensione a frota de transporte universitário.">
+    <meta name="theme-color" content="#0f0c29">
+    <title>VEM — Painel da Gestora</title>
+    <style>
+        /* ══════════════════════════════════════════════
+           DESIGN SYSTEM — Glassmorphism Premium Desktop
+           Paleta: Deep Blue → Dark Purple
+           POUR AAA | Design Consistente com Aluno
+        ══════════════════════════════════════════════ */
+
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-start: #001f3f;
+            --bg-mid: #003366;
+            --bg-end: #001a35;
+            --glass-bg: rgba(255, 255, 255, 0.06);
+            --glass-border: rgba(255, 255, 255, 0.14);
+            --glass-shadow: rgba(0, 0, 0, 0.35);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --accent: #f39c12;
+            --accent-glow: rgba(243, 156, 18, 0.4);
+            --accent-hover: #e67e22;
+            --success: #00c896;
+            --success-glow: rgba(0, 200, 150, 0.3);
+            --danger: #ff6b6b;
+            --warning: #ffb74d;
+            --sidebar-width: 240px;
+            --radius: 16px;
+            --radius-sm: 12px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            font-family: var(--font);
+            background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-mid) 50%, var(--bg-end) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background orbs */
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.2;
+            z-index: 0;
+            pointer-events: none;
+        }
+        body::before {
+            width: 500px;
+            height: 500px;
+            background: var(--accent);
+            top: -150px;
+            right: -150px;
+            animation: float-orb 12s ease-in-out infinite alternate;
+        }
+        body::after {
+            width: 400px;
+            height: 400px;
+            background: #e040fb;
+            bottom: -120px;
+            left: -120px;
+            animation: float-orb 15s ease-in-out infinite alternate-reverse;
+        }
+
+        @keyframes float-orb {
+            0%   { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(40px, -50px) scale(1.1); }
+        }
+
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ═══════════════════════════
+           LOGIN CARD (Centered)
+        ═══════════════════════════ */
+        .login-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+        .login-card {
+            position: relative;
+            z-index: 1;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            box-shadow: 0 8px 32px var(--glass-shadow);
+            padding: 2.5rem 2rem;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        /* ═══════════════════════════
+           LAYOUT: Sidebar + Main
+        ═══════════════════════════ */
+        .app-layout {
+            display: none;
+            min-height: 100vh;
+        }
+        .app-layout.active {
+            display: flex;
+        }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: rgba(10, 8, 30, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem 0;
+            transition: transform var(--transition);
+        }
+        .sidebar-logo {
+            text-align: center;
+            padding: 0 1rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 0.5rem;
+        }
+        .sidebar-logo .logo-icon {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+        .sidebar-logo h1 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .sidebar-logo p {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-top: 0.15rem;
+        }
+
+        .nav-menu {
+            flex: 1;
+            padding: 0.5rem 0;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.85rem 1.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            border-left: 3px solid transparent;
+            text-decoration: none;
+            user-select: none;
+        }
+        .nav-item:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.04);
+        }
+        .nav-item.active {
+            color: var(--accent);
+            background: rgba(108, 99, 255, 0.08);
+            border-left-color: var(--accent);
+        }
+        .nav-item .nav-icon {
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 1rem 1.5rem;
+        }
+
+        /* ── Main Content Area ── */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+        }
+
+        /* ── Mobile: Sidebar toggle ── */
+        .sidebar-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 200;
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: rgba(10, 8, 30, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-primary);
+            font-size: 1.3rem;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+        }
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 99;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .sidebar-overlay.open {
+                display: block;
+            }
+            .sidebar-toggle {
+                display: flex;
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+                padding-top: 4rem;
+            }
+        }
+
+        /* ═══════════════════════════
+           SECTIONS (rotas)
+        ═══════════════════════════ */
+        .section {
+            display: none;
+            animation: fadeSlideIn 0.35s ease-out;
+        }
+        .section.active {
+            display: block;
+        }
+        .section-header {
+            margin-bottom: 2rem;
+        }
+        .section-header h2 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+        .section-header p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* ═══════════════════════════
+           SHARED COMPONENTS
+        ═══════════════════════════ */
+
+        /* ── Glass Panel ── */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* ── Summary Grid (Dashboard) ── */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+        }
+        .summary-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius-sm);
+            padding: 1.25rem;
+            transition: all var(--transition);
+        }
+        .summary-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+        .summary-card .day-label {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+        .summary-card .date-sub {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+        .summary-card .metric {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            margin-bottom: 0.4rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 0.25rem;
+        }
+        .summary-card .metric span.num {
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .summary-card .suggestion {
+            margin-top: 0.8rem;
+            font-size: 0.8rem;
+            background: rgba(108, 99, 255, 0.12);
+            border-radius: 8px;
+            padding: 0.5rem 0.75rem;
+        }
+        .summary-card .suggestion-title {
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.25rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+        .summary-card .suggestion-details {
+            color: var(--text-primary);
+            font-size: 0.75rem;
+            line-height: 1.25;
+        }
+
+        /* ── Controls Section (Filters) ── */
+        .controls-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: flex-end;
+            margin-bottom: 1.5rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-sm);
+            padding: 1.25rem;
+        }
+        .control-group {
+            flex: 1;
+            min-width: 180px;
+        }
+        .control-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.4rem;
+        }
+        .control-group select,
+        .control-group input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            outline: none;
+            transition: all var(--transition);
+        }
+        .control-group select:focus,
+        .control-group input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        /* ── Fix: Alto contraste em dropdowns nativos ── */
+        select option {
+            background: #1a1a2e;
+            color: #f0f0f5;
+        }
+        select option:checked {
+            background: #302b63;
+            color: #fff;
+        }
+
+        /* ── Buttons ── */
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            color: white;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--accent-glow);
+        }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .btn-danger {
+            background: rgba(255, 107, 107, 0.15);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+        .btn-danger:hover {
+            background: var(--danger);
+            color: white;
+        }
+        .btn-success {
+            background: rgba(0, 200, 150, 0.15);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+        .btn-success:hover {
+            background: var(--success);
+            color: white;
+        }
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+        }
+        .btn-block {
+            display: flex;
+            width: 100%;
+        }
+
+        /* ── Table Area ── */
+        .table-area {
+            overflow-x: auto;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-sm);
+            background: rgba(255, 255, 255, 0.01);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        th {
+            background: rgba(255, 255, 255, 0.04);
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        .badge-normal {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+        .badge-excecao {
+            background: rgba(230, 81, 0, 0.18);
+            color: #ffb74d;
+            border: 1px solid rgba(230, 81, 0, 0.4);
+        }
+        .badge-success {
+            background: rgba(0, 200, 150, 0.15);
+            color: var(--success);
+        }
+        .badge-pending {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+        }
+        .badge-active {
+            background: rgba(0, 200, 150, 0.15);
+            color: var(--success);
+        }
+        .badge-inactive {
+            background: rgba(255, 107, 107, 0.15);
+            color: var(--danger);
+        }
+
+        /* ── Form Inputs ── */
+        .form-group {
+            margin-bottom: 1.25rem;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.4rem;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 1rem;
+            outline: none;
+            transition: all var(--transition);
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .alert-error {
+            font-size: 0.8rem;
+            color: var(--danger);
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        /* ── Inline Form Row ── */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        /* ── Status Indicators ── */
+        .status-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            border-radius: var(--radius-sm);
+            margin-bottom: 1rem;
+        }
+        .status-card.status-open {
+            background: rgba(0, 200, 150, 0.1);
+            border: 1px solid rgba(0, 200, 150, 0.25);
+        }
+        .status-card.status-closed {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.25);
+        }
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+        .status-open .status-dot { background: var(--success); }
+        .status-closed .status-dot { background: var(--danger); }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        .status-text {
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+        .status-detail {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* ── Toggle Switch ── */
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .toggle-label {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .toggle-sublabel {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.15rem;
+        }
+        .toggle-switch-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .toggle-option {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-secondary);
+            transition: all var(--transition);
+        }
+        .toggle-option.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+            box-shadow: 0 2px 10px var(--accent-glow);
+        }
+        .toggle-option.active-danger {
+            background: var(--danger);
+            border-color: var(--danger);
+            color: #fff;
+        }
+        .toggle-option.active-success {
+            background: var(--success);
+            border-color: var(--success);
+            color: #fff;
+        }
+
+        /* ── Empty State ── */
+        .empty-state {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 3rem 1rem;
+            font-size: 0.95rem;
+        }
+        .empty-state .empty-icon {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 0.75rem;
+            opacity: 0.5;
+        }
+
+        /* ── Toast Notification ── */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            font-weight: 600;
+            z-index: 999;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        .toast-success {
+            background: rgba(0, 200, 150, 0.9);
+            color: #fff;
+        }
+        .toast-error {
+            background: rgba(255, 107, 107, 0.9);
+            color: #fff;
+        }
+
+        /* ── Modal ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 500;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .modal-overlay.open {
+            display: flex;
+        }
+        .modal-card {
+            background: rgba(30, 27, 60, 0.98);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: var(--radius);
+            padding: 2rem;
+            width: 100%;
+            max-width: 500px;
+            animation: fadeSlideIn 0.3s ease-out;
+        }
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .logo {
+            margin-bottom: 2rem;
+        }
+        .logo-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══ TELA DE LOGIN ADMIN ═══ -->
+    <div id="login-screen" class="login-wrapper">
+        <div class="login-card">
+            <div class="logo">
+                <span class="logo-icon">🔑</span>
+                <h1>Painel da Gestora</h1>
+                <p>Acesso restrito ao motor preditivo</p>
+            </div>
+            <div class="form-group">
+                <label for="admin-token">Token de Acesso</label>
+                <input type="password" id="admin-token" placeholder="Digite o token administrativo">
+            </div>
+            <div id="login-error" class="alert-error">Chave administrativa incorreta.</div>
+            <button class="btn btn-primary btn-block" onclick="tentarLogin()">Entrar</button>
+        </div>
+    </div>
+
+    <!-- ═══ APP LAYOUT (Sidebar + Main) ═══ -->
+    <div id="app-layout" class="app-layout">
+
+        <!-- Mobile toggle -->
+        <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+        <!-- ── SIDEBAR ── -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-logo">
+                <span class="logo-icon">🚌</span>
+                <h1>VEM Gestora</h1>
+                <p>Sistema de Transporte</p>
+            </div>
+
+            <nav class="nav-menu">
+                <a class="nav-item active" data-route="dashboard" onclick="navigateTo('dashboard')">
+                    <span class="nav-icon">📊</span>
+                    Dashboard
+                </a>
+                <a class="nav-item" data-route="veiculos" onclick="navigateTo('veiculos')">
+                    <span class="nav-icon">🚐</span>
+                    Veículos
+                </a>
+                <a class="nav-item" data-route="passageiros" onclick="navigateTo('passageiros')">
+                    <span class="nav-icon">👥</span>
+                    Passageiros
+                </a>
+                <a class="nav-item" data-route="configuracoes" onclick="navigateTo('configuracoes')">
+                    <span class="nav-icon">⚙️</span>
+                    Configurações
+                </a>
+                <a class="nav-item" data-route="avisos" onclick="navigateTo('avisos')">
+                    <span class="nav-icon">📢</span>
+                    Avisos
+                </a>
+                <a class="nav-item" data-route="rotas" onclick="navigateTo('rotas')">
+                    <span class="nav-icon">🛣️</span>
+                    Rotas
+                </a>
+                <a class="nav-item" data-route="pontos" onclick="navigateTo('pontos')">
+                    <span class="nav-icon">📍</span>
+                    Pontos de Parada
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="btn btn-secondary btn-sm btn-block" onclick="logout()">
+                    🚪 Sair
+                </button>
+            </div>
+        </aside>
+
+        <!-- ── MAIN CONTENT ── -->
+        <main class="main-content">
+
+            <!-- ═══ SEÇÃO: DASHBOARD ═══ -->
+            <section id="section-dashboard" class="section active">
+                <div class="section-header">
+                    <h2>Dashboard</h2>
+                    <p>Gestão de Frota, Demanda Preditiva e Exceções</p>
+                </div>
+
+                <!-- Status das inscrições -->
+                <div id="inscricoes-status-bar"></div>
+
+                <!-- Rastreamento de Veículos -->
+                <div class="glass-panel" id="gestora-tracking-panel">
+                    <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem;">Rastreamento em Tempo Real</h3>
+                    <div class="control-group" style="max-width: 300px; margin-bottom: 1rem;">
+                        <label for="gestora-tracking-rota">Filtrar por Rota</label>
+                        <select id="gestora-tracking-rota" onchange="renderTrackingGestora()">
+                            <option value="">Todas as Rotas</option>
+                        </select>
+                    </div>
+                    <div id="gestora-tracking-container" style="display: flex; flex-direction: column; gap: 1rem;">Carregando rastreamento...</div>
+                </div>
+
+                <!-- Cards de volumetria diária da semana -->
+                <div class="summary-grid" id="summary-grid">
+                    <!-- Gerado via JS -->
+                </div>
+
+                <!-- Seção de Consultas e Tabela -->
+                <div class="glass-panel">
+                    <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem;">Detalhamento e Lista de Passageiros</h3>
+                    
+                    <div class="controls-section">
+                        <div class="control-group">
+                            <label for="filter-date">Data da Viagem</label>
+                            <input type="date" id="filter-date" onchange="carregarTabela()">
+                        </div>
+                        <div class="control-group">
+                            <label for="filter-type">Turno</label>
+                            <select id="filter-type" onchange="carregarTabela()">
+                                <option value="IDA">IDA (Saída Cidade)</option>
+                                <option value="VOLTA">VOLTA (Saída Campus)</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label for="search-input">Buscar Passageiro</label>
+                            <input type="text" id="search-input" placeholder="Nome, CPF..." oninput="filtrarTabelaLocal()">
+                        </div>
+                        <div>
+                            <button class="btn btn-primary" onclick="exportarCSV()">
+                                <span>📥</span> Exportar CSV
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-area">
+                        <table id="passengers-table">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>CPF</th>
+                                    <th>Tipo Vaga</th>
+                                    <th>Embarcou? (Check-in)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                <!-- Gerado via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══ SEÇÃO: VEÍCULOS ═══ -->
+            <section id="section-veiculos" class="section">
+                <div class="section-header">
+                    <h2>Gestão de Veículos</h2>
+                    <p>Adicione, edite e gerencie a frota de transporte</p>
+                </div>
+
+                <!-- Formulário de Adicionar Veículo -->
+                <div class="glass-panel">
+                    <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 1rem;">Adicionar Novo Veículo</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="v-id">ID / Placa</label>
+                            <input type="text" id="v-id" placeholder="Ex: ABC-1234">
+                        </div>
+                        <div class="form-group">
+                            <label for="v-nome">Nome / Descrição</label>
+                            <input type="text" id="v-nome" placeholder="Ex: Ônibus Escolar 01">
+                        </div>
+                        <div class="form-group">
+                            <label for="v-tipo">Classificação</label>
+                            <select id="v-tipo">
+                                <option value="VAN">Van</option>
+                                <option value="MICRO">Micro-ônibus</option>
+                                <option value="ONIBUS" selected>Ônibus</option>
+                                <option value="OUTRO">Outro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="v-capacidade">Capacidade (lugares)</label>
+                            <input type="number" id="v-capacidade" min="1" max="100" value="44">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="adicionarVeiculo()">
+                        <span>➕</span> Adicionar Veículo
+                    </button>
+                </div>
+
+                <!-- Lista de Veículos -->
+                <div class="glass-panel">
+                    <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 1rem;">Frota Cadastrada</h3>
+                    <div class="table-area">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID / Placa</th>
+                                    <th>Nome</th>
+                                    <th>Classificação</th>
+                                    <th>Capacidade</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="veiculos-table-body">
+                                <!-- Gerado via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══ SEÇÃO: PASSAGEIROS ═══ -->
+            <section id="section-passageiros" class="section">
+                <div class="section-header">
+                    <h2>Gestão de Passageiros</h2>
+                    <p>Cadastre novos alunos e gerencie inscrições</p>
+                </div>
+
+                <!-- Formulário de Cadastro -->
+                <div class="glass-panel">
+                    <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 1rem;">Cadastrar Novo Passageiro</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="p-cpf">CPF (somente dígitos)</label>
+                            <input type="text" id="p-cpf" placeholder="12345678901" maxlength="11" inputmode="numeric">
+                        </div>
+                        <div class="form-group">
+                            <label for="p-nome">Nome Completo</label>
+                            <input type="text" id="p-nome" placeholder="Nome do aluno">
+                        </div>
+                        <div class="form-group">
+                            <label for="p-rota">Rota</label>
+                            <input type="text" id="p-rota" placeholder="Cidade A -> Campus">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="p-pin">PIN (4 dígitos)</label>
+                            <input type="password" id="p-pin" placeholder="0000" maxlength="4" inputmode="numeric">
+                        </div>
+                        <div class="form-group">
+                            <label for="p-tipo">Tipo de Vaga</label>
+                            <select id="p-tipo">
+                                <option value="NORMAL">Normal</option>
+                                <option value="EXCECAO">Exceção (Vaga Blindada)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="cadastrarPassageiro()">
+                        <span>➕</span> Cadastrar Passageiro
+                    </button>
+                </div>
+
+                <!-- Lista de Passageiros -->
+                <div class="glass-panel">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                        <h3 style="font-size: 1rem; font-weight: 700;">Passageiros Cadastrados</h3>
+                        <div class="control-group" style="min-width: 220px; flex: unset;">
+                            <input type="text" id="passageiros-search" placeholder="Buscar por nome ou CPF..." oninput="filtrarPassageiros()">
+                        </div>
+                    </div>
+                    <div class="table-area">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>CPF</th>
+                                    <th>Nome</th>
+                                    <th>Rota</th>
+                                    <th>Tipo Vaga</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="passageiros-table-body">
+                                <!-- Gerado via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══ SEÇÃO: CONFIGURAÇÕES ═══ -->
+            <section id="section-configuracoes" class="section">
+                <div class="section-header">
+                    <h2>Configurações</h2>
+                    <p>Horário de corte, controle de inscrições e status do sistema</p>
+                </div>
+
+                <!-- Status Atual -->
+                <div class="glass-panel">
+                    <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 1rem;">Status Atual das Inscrições</h3>
+                    <div id="config-status-display"></div>
+                </div>
+
+                <!-- Relatório de Viagens -->
+                <div class="glass-panel">
+                    <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 1rem;">Relatórios de Viagens Consolidadas</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                        Exporte o histórico completo de check-ins e viagens realizadas. O relatório não pesa no servidor.
+                    </p>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="rel-data-inicio">Data Início</label>
+                            <input type="date" id="rel-data-inicio">
+                        </div>
+                        <div class="form-group">
+                            <label for="rel-data-fim">Data Fim</label>
+                            <input type="date" id="rel-data-fim">
+                        </div>
+                        <div style="display: flex; align-items: flex-end;">
+                            <button class="btn btn-primary" onclick="baixarRelatorioViagens()">
+                                <span>📥</span> Baixar CSV
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Horário de Corte -->
+                <div class="glass-panel">
+                    <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 1rem;">Horário de Corte</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                        Defina o horário limite para reservas no dia corrente. Após este horário, 
+                        as reservas para o dia atual serão automaticamente bloqueadas.
+                    </p>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="config-horario">Horário de Fechamento</label>
+                            <input type="time" id="config-horario" value="14:00">
+                        </div>
+                        <div style="display: flex; align-items: flex-end;">
+                            <button class="btn btn-primary" onclick="salvarHorarioCorte()">
+                                Salvar Horário
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trava Manual -->
+                <div class="glass-panel">
+                    <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 1rem;">Trava Manual (Override)</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                        Controle manual que sobrepõe a regra de horário. Use para abrir ou fechar
+                        inscrições em situações excepcionais.
+                    </p>
+                    <div class="toggle-row" style="border-bottom: none;">
+                        <div>
+                            <div class="toggle-label">Modo de Inscrição</div>
+                            <div class="toggle-sublabel" id="trava-descricao">Automático — segue o horário de corte</div>
+                        </div>
+                        <div class="toggle-switch-group" id="trava-switch">
+                            <button class="toggle-option active" data-val="AUTO" onclick="setTrava('AUTO')">🤖 Auto</button>
+                            <button class="toggle-option" data-val="ABERTO" onclick="setTrava('ABERTO')">🟢 Abrir</button>
+                            <button class="toggle-option" data-val="FECHADO" onclick="setTrava('FECHADO')">🔴 Fechar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info do Servidor -->
+                <div class="glass-panel">
+                    <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 1rem;">Informações do Servidor</h3>
+                    <div id="server-info" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.8;"></div>
+                </div>
+            </section>
+
+            <!-- ═══ SEÇÃO: AVISOS (Requisito A) ═══ -->
+            <section id="section-avisos" class="section">
+                <div class="section-header">
+                    <h2>📢 Mural de Avisos</h2>
+                    <p>Publique avisos para todos os alunos sobre mudanças de trajeto e interdições</p>
+                </div>
+
+                <!-- Formulário de Criar Aviso -->
+                <div class="glass-panel">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                        <h3 style="font-size: 1rem; font-weight: 700;">Publicar Novo Aviso</h3>
+                        <span id="avisos-limite" style="font-size: 0.8rem; color: var(--text-secondary);">0/10 avisos ativos</span>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="av-titulo">Título (máx. 100 caracteres)</label>
+                            <input type="text" id="av-titulo" placeholder="Ex: Rua XV interditada amanhã" maxlength="100">
+                        </div>
+                        <div class="form-group">
+                            <label for="av-tipo">Tipo</label>
+                            <select id="av-tipo">
+                                <option value="INFO">ℹ️ Informativo</option>
+                                <option value="URGENTE">⚠️ Urgente</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="av-mensagem">Mensagem (máx. 500 caracteres)</label>
+                        <input type="text" id="av-mensagem" placeholder="Ex: O trajeto de ida será desviado pela Av. Brasil. Embarque 10 min mais cedo." maxlength="500">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="av-expira">Data de Expiração (opcional)</label>
+                            <input type="date" id="av-expira">
+                        </div>
+                        <div style="display: flex; align-items: flex-end;">
+                            <button class="btn btn-primary" onclick="criarAviso()">
+                                <span>📢</span> Publicar Aviso
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lista de Avisos -->
+                <div class="glass-panel">
+                    <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 1rem;">Avisos Publicados</h3>
+                    <div class="table-area">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Título</th>
+                                    <th>Mensagem</th>
+                                    <th>Expira em</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="avisos-table-body">
+                                <!-- Gerado via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══ SEÇÃO: ROTAS ═══ -->
+            <section id="section-rotas" class="section">
+                <div class="section-header">
+                    <h2>🛣️ Gestão de Rotas</h2>
+                    <p>Cadastre as rotas principais que serão utilizadas pelos veículos e alunos</p>
+                </div>
+
+                <div class="glass-panel">
+                    <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 1rem;">Adicionar Nova Rota</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="rt-nome">Nome da Rota</label>
+                            <input type="text" id="rt-nome" placeholder="Ex: Cidade A -> Campus">
+                        </div>
+                        <div style="display: flex; align-items: flex-end;">
+                            <button class="btn btn-primary" onclick="criarRota()">
+                                <span>➕</span> Criar Rota
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel">
+                    <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 1rem;">Rotas Cadastradas</h3>
+                    <div class="table-area">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome da Rota</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rotas-table-body">
+                                <!-- Gerado via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══ SEÇÃO: PONTOS DE ROTA (Requisito B) ═══ -->
+            <section id="section-pontos" class="section">
+                <div class="section-header">
+                    <h2>📍 Pontos de Parada</h2>
+                    <p>Cadastre os pontos de parada atrelados a cada Rota</p>
+                </div>
+
+                <!-- Formulário de Cadastro de Ponto -->
+                <div class="glass-panel">
+                    <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 1rem;">Adicionar Ponto de Rota</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="pt-rota">Rota</label>
+                            <select id="pt-rota">
+                                <!-- Preenchido via API -->
+                                <option value="">Carregando rotas...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="pt-nome">Nome do Ponto</label>
+                            <input type="text" id="pt-nome" placeholder="Ex: Rodoviária">
+                        </div>
+                        <div class="form-group">
+                            <label for="pt-ordem">Ordem</label>
+                            <input type="number" id="pt-ordem" min="1" value="1" style="max-width: 100px;">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="criarPontoRota()">
+                        <span>➕</span> Adicionar Ponto
+                    </button>
+                </div>
+
+                <!-- Lista de Pontos -->
+                <div class="glass-panel">
+                    <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 1rem;">Pontos Cadastrados</h3>
+                    <div class="table-area">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Rota</th>
+                                    <th>Ordem</th>
+                                    <th>Nome do Ponto</th>
+                                    <th>ID</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pontos-table-body">
+                                <!-- Gerado via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ═══ MODAL DE EDIÇÃO DE VEÍCULO ═══ -->
+    <div class="modal-overlay" id="modal-veiculo">
+        <div class="modal-card">
+            <h3 class="modal-title">Editar Veículo</h3>
+            <input type="hidden" id="edit-v-id-original">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="edit-v-nome">Nome / Descrição</label>
+                    <input type="text" id="edit-v-nome">
+                </div>
+                <div class="form-group">
+                    <label for="edit-v-tipo">Classificação</label>
+                    <select id="edit-v-tipo">
+                        <option value="VAN">Van</option>
+                        <option value="MICRO">Micro-ônibus</option>
+                        <option value="ONIBUS">Ônibus</option>
+                        <option value="OUTRO">Outro</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="edit-v-capacidade">Capacidade (lugares)</label>
+                <input type="number" id="edit-v-capacidade" min="1" max="100">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
+                <button class="btn btn-primary" onclick="salvarEdicaoVeiculo()">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ MODAL DE EDIÇÃO DE AVISO ═══ -->
+    <div class="modal-overlay" id="modal-aviso">
+        <div class="modal-card">
+            <h3 class="modal-title">Editar Aviso</h3>
+            <input type="hidden" id="edit-av-id">
+            <div class="form-group">
+                <label for="edit-av-titulo">Título</label>
+                <input type="text" id="edit-av-titulo" maxlength="100">
+            </div>
+            <div class="form-group">
+                <label for="edit-av-mensagem">Mensagem</label>
+                <input type="text" id="edit-av-mensagem" maxlength="500">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="edit-av-tipo">Tipo</label>
+                    <select id="edit-av-tipo">
+                        <option value="INFO">ℹ️ Informativo</option>
+                        <option value="URGENTE">⚠️ Urgente</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-av-expira">Data de Expiração</label>
+                    <input type="date" id="edit-av-expira">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="fecharModalAviso()">Cancelar</button>
+                <button class="btn btn-primary" onclick="salvarEdicaoAviso()">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ MODAL DE EDIÇÃO DE PONTO ═══ -->
+    <div class="modal-overlay" id="modal-ponto">
+        <div class="modal-card">
+            <h3 class="modal-title">Editar Ponto de Rota</h3>
+            <input type="hidden" id="edit-pt-id">
+            <div class="form-group">
+                <label for="edit-pt-nome">Nome do Ponto</label>
+                <input type="text" id="edit-pt-nome">
+            </div>
+            <div class="form-group">
+                <label for="edit-pt-ordem">Ordem</label>
+                <input type="number" id="edit-pt-ordem" min="1">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="fecharModalPonto()">Cancelar</button>
+                <button class="btn btn-primary" onclick="salvarEdicaoPonto()">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ TOAST ═══ -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ══════════════════════════════════════════════
+        // GLOBALS
+        // ══════════════════════════════════════════════
+        let adminToken = sessionStorage.getItem("adminToken") || "";
+        let passageirosAtuais = [];
+        let todosPassageiros = [];
+        let todosVeiculos = [];
+
+        // ══════════════════════════════════════════════
+        // INIT
+        // ══════════════════════════════════════════════
+        document.addEventListener("DOMContentLoaded", () => {
+            const hoje = new Date();
+            const yyyy = hoje.getFullYear();
+            const mm = String(hoje.getMonth() + 1).padStart(2, '0');
+            const dd = String(hoje.getDate()).padStart(2, '0');
+            document.getElementById("filter-date").value = `${yyyy}-${mm}-${dd}`;
+
+            if (adminToken) {
+                mostrarPainel();
+            }
+
+            // Hash routing
+            window.addEventListener("hashchange", handleHash);
+        });
+
+        // ══════════════════════════════════════════════
+        // TOAST NOTIFICATION
+        // ══════════════════════════════════════════════
+        function showToast(msg, type = "success") {
+            const t = document.getElementById("toast");
+            t.textContent = msg;
+            t.className = `toast toast-${type} show`;
+            setTimeout(() => { t.classList.remove("show"); }, 3000);
+        }
+
+        // ══════════════════════════════════════════════
+        // AUTH
+        // ══════════════════════════════════════════════
+        function tentarLogin() {
+            const tokenInput = document.getElementById("admin-token").value.trim();
+            if (!tokenInput) return;
+
+            fetch("/api/veiculos", {
+                headers: { "X-Admin-Token": tokenInput }
+            })
+            .then(res => {
+                if (res.ok) {
+                    adminToken = tokenInput;
+                    sessionStorage.setItem("adminToken", adminToken);
+                    document.getElementById("login-error").style.display = "none";
+                    mostrarPainel();
+                } else {
+                    document.getElementById("login-error").style.display = "block";
+                }
+            })
+            .catch(() => {
+                document.getElementById("login-error").style.display = "block";
+            });
+        }
+
+        // Allow Enter key on login input
+        document.getElementById("admin-token").addEventListener("keydown", e => {
+            if (e.key === "Enter") tentarLogin();
+        });
+
+        function logout() {
+            sessionStorage.removeItem("adminToken");
+            adminToken = "";
+            document.getElementById("app-layout").classList.remove("active");
+            document.getElementById("login-screen").style.display = "flex";
+            document.getElementById("admin-token").value = "";
+        }
+
+        function mostrarPainel() {
+            document.getElementById("login-screen").style.display = "none";
+            document.getElementById("app-layout").classList.add("active");
+            handleHash();
+        }
+
+        // ══════════════════════════════════════════════
+        // NAVIGATION (SPA Hash Routing)
+        // ══════════════════════════════════════════════
+        function navigateTo(route) {
+            window.location.hash = route;
+            // Close mobile sidebar
+            document.getElementById("sidebar").classList.remove("open");
+            document.getElementById("sidebar-overlay").classList.remove("open");
+        }
+
+        function handleHash() {
+            const hash = window.location.hash.replace("#", "") || "dashboard";
+            const validRoutes = ["dashboard", "veiculos", "passageiros", "configuracoes", "avisos", "pontos", "rotas"];
+            const route = validRoutes.includes(hash) ? hash : "dashboard";
+
+            // Update sections
+            document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+            const target = document.getElementById(`section-${route}`);
+            if (target) target.classList.add("active");
+
+            // Update nav
+            document.querySelectorAll(".nav-item").forEach(n => {
+                n.classList.toggle("active", n.dataset.route === route);
+            });
+
+            // Load data for the section
+            if (route === "dashboard") {
+                carregarResumoSemanal();
+                carregarTabela();
+                carregarStatusInscricoes();
+                carregarRotas(true); // Populate tracking filter
+            } else if (route === "veiculos") {
+                carregarVeiculos();
+            } else if (route === "passageiros") {
+                carregarPassageiros();
+            } else if (route === "configuracoes") {
+                carregarConfiguracoes();
+            } else if (route === "avisos") {
+                carregarAvisos();
+            } else if (route === "pontos") {
+                carregarRotas(); // Populate 'pt-rota' select
+                carregarPontosRota();
+            } else if (route === "rotas") {
+                carregarRotas();
+            }
+
+            // Start/Stop tracking polling
+            if (route === "dashboard") {
+                iniciarPollingTrackingGestora();
+            } else {
+                pararPollingTrackingGestora();
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById("sidebar").classList.toggle("open");
+            document.getElementById("sidebar-overlay").classList.toggle("open");
+        }
+
+        // ══════════════════════════════════════════════
+        // DASHBOARD — Resumo Semanal
+        // ══════════════════════════════════════════════
+        function carregarStatusInscricoes() {
+            fetch("/api/status-inscricoes")
+            .then(r => r.json())
+            .then(data => {
+                const bar = document.getElementById("inscricoes-status-bar");
+                const isOpen = data.status === "ABERTO";
+                bar.innerHTML = `
+                    <div class="status-card ${isOpen ? 'status-open' : 'status-closed'}">
+                        <div class="status-dot"></div>
+                        <div>
+                            <div class="status-text">Inscrições: ${data.status}</div>
+                            <div class="status-detail">${data.motivo}</div>
+                        </div>
+                    </div>
+                `;
+            })
+            .catch(() => {});
+        }
+
+        function carregarResumoSemanal() {
+            fetch("/api/painel", {
+                headers: { "X-Admin-Token": adminToken }
+            })
+            .then(res => res.json())
+            .then(data => {
+                const grid = document.getElementById("summary-grid");
+                grid.innerHTML = "";
+
+                if (!data.resumo_diario || data.resumo_diario.length === 0) {
+                    grid.innerHTML = `<div class="empty-state" style="grid-column: 1/-1;">
+                        <span class="empty-icon">📭</span>
+                        Nenhuma reserva ativa nesta semana.
+                    </div>`;
+                    return;
+                }
+
+                data.resumo_diario.forEach(dia => {
+                    const formatSugestao = (frota) => {
+                        if (!frota || frota.length === 0) return "Nenhum veículo";
+                        return frota.map(v => `${v.qtd}x ${v.tipo}`).join(", ");
+                    };
+
+                    const [ano, mes, diaNum] = dia.data.split("-");
+                    const dataBr = `${diaNum}/${mes}`;
+
+                    const card = document.createElement("div");
+                    card.className = "summary-card";
+                    card.innerHTML = `
+                        <div class="day-label">${dia.dia}</div>
+                        <div class="date-sub">${dataBr}</div>
+                        <div class="metric">
+                            <span>Total Ida:</span>
+                            <span class="num">${dia.total_ida}</span>
+                        </div>
+                        <div class="metric">
+                            <span>Total Volta:</span>
+                            <span class="num">${dia.total_volta}</span>
+                        </div>
+                        <div class="metric" style="border-bottom: none;">
+                            <span>Exceções (I/V):</span>
+                            <span>${dia.excecoes_ida} / ${dia.excecoes_volta}</span>
+                        </div>
+                        <div class="suggestion">
+                            <div class="suggestion-title">Frota Sugerida (Ida)</div>
+                            <div class="suggestion-details">${formatSugestao(dia.sugestao_frota.ida)}</div>
+                            <div class="suggestion-title" style="margin-top: 0.4rem;">Frota Sugerida (Volta)</div>
+                            <div class="suggestion-details">${formatSugestao(dia.sugestao_frota.volta)}</div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            });
+        }
+
+        function carregarTabela() {
+            const dataVal = document.getElementById("filter-date").value;
+            const tipoVal = document.getElementById("filter-type").value;
+
+            if (!dataVal) return;
+
+            fetch(`/api/checklist/${dataVal}?tipo=${tipoVal}`, {
+                headers: { "X-Admin-Token": adminToken }
+            })
+            .then(res => res.json())
+            .then(data => {
+                passageirosAtuais = data.passageiros || [];
+                filtrarTabelaLocal();
+            });
+        }
+
+        function filtrarTabelaLocal() {
+            const search = document.getElementById("search-input").value.toLowerCase().trim();
+            const body = document.getElementById("table-body");
+            body.innerHTML = "";
+
+            const filtrados = passageirosAtuais.filter(p => {
+                return p.nome.toLowerCase().includes(search) || p.cpf.includes(search);
+            });
+
+            if (filtrados.length === 0) {
+                body.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-secondary);">Nenhum passageiro encontrado.</td></tr>`;
+                return;
+            }
+
+            filtrados.forEach(p => {
+                const tr = document.createElement("tr");
+                const badgeClass = p.tipo_vaga === "EXCECAO" ? "badge-excecao" : "badge-normal";
+                const badgeText = p.tipo_vaga === "EXCECAO" ? "EXCEÇÃO" : "REGULAR";
+
+                const checkinBadge = p.checkin 
+                    ? `<span class="badge badge-success">✓ CONFIRMADO</span>` 
+                    : `<span class="badge badge-pending">PENDENTE</span>`;
+
+                tr.innerHTML = `
+                    <td style="font-weight: 600;">${p.nome}</td>
+                    <td>${p.cpf}</td>
+                    <td><span class="badge ${badgeClass}">${badgeText}</span></td>
+                    <td>${checkinBadge}</td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        function exportarCSV() {
+            if (passageirosAtuais.length === 0) {
+                showToast("Não há dados para exportar.", "error");
+                return;
+            }
+
+            const dataVal = document.getElementById("filter-date").value;
+            const tipoVal = document.getElementById("filter-type").value;
+
+            const headers = ["Nome", "CPF", "Tipo Vaga", "Checkin Confirmado"];
+            const rows = passageirosAtuais.map(p => [
+                p.nome,
+                p.cpf,
+                p.tipo_vaga,
+                p.checkin ? "SIM" : "NAO"
+            ]);
+
+            let csvContent = "\uFEFF";
+            csvContent += headers.join(";") + "\n";
+            rows.forEach(r => {
+                csvContent += r.join(";") + "\n";
+            });
+
+            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `VEM_Checklist_${dataVal}_${tipoVal}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // ══════════════════════════════════════════════
+        // VEÍCULOS — CRUD
+        // ══════════════════════════════════════════════
+        function carregarVeiculos() {
+            fetch("/api/veiculos", {
+                headers: { "X-Admin-Token": adminToken }
+            })
+            .then(res => res.json())
+            .then(data => {
+                todosVeiculos = data;
+                renderizarVeiculos();
+            });
+        }
+
+        function renderizarVeiculos() {
+            const body = document.getElementById("veiculos-table-body");
+            body.innerHTML = "";
+
+            if (todosVeiculos.length === 0) {
+                body.innerHTML = `<tr><td colspan="6" class="empty-state"><span class="empty-icon">🚐</span>Nenhum veículo cadastrado.</td></tr>`;
+                return;
+            }
+
+            const tipoLabel = { VAN: "Van", MICRO: "Micro-ônibus", ONIBUS: "Ônibus", OUTRO: "Outro" };
+
+            todosVeiculos.forEach(v => {
+                const tr = document.createElement("tr");
+                const statusBadge = v.ativo
+                    ? `<span class="badge badge-active">ATIVO</span>`
+                    : `<span class="badge badge-inactive">INATIVO</span>`;
+
+                tr.innerHTML = `
+                    <td style="font-weight: 700;">${v.id}</td>
+                    <td>${v.nome || '—'}</td>
+                    <td>${tipoLabel[v.tipo] || v.tipo}</td>
+                    <td style="font-weight: 700; color: var(--accent);">${v.capacidade}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm" onclick="abrirEdicaoVeiculo('${v.id}')">✏️</button>
+                        ${v.ativo
+                            ? `<button class="btn btn-danger btn-sm" onclick="excluirVeiculo('${v.id}')">🗑️</button>`
+                            : `<button class="btn btn-success btn-sm" onclick="reativarVeiculo('${v.id}')">♻️</button>`
+                        }
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        function adicionarVeiculo() {
+            const id = document.getElementById("v-id").value.trim();
+            const nome = document.getElementById("v-nome").value.trim();
+            const tipo = document.getElementById("v-tipo").value;
+            const capacidade = parseInt(document.getElementById("v-capacidade").value);
+
+            if (!id) { showToast("ID/Placa é obrigatório.", "error"); return; }
+            if (!capacidade || capacidade <= 0) { showToast("Capacidade inválida.", "error"); return; }
+
+            fetch("/api/veiculos", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "X-Admin-Token": adminToken },
+                body: JSON.stringify({ id, nome, tipo, capacidade })
+            })
+            .then(res => res.json().then(d => ({ ok: res.ok, data: d })))
+            .then(({ ok, data }) => {
+                if (ok && data.sucesso) {
+                    showToast("Veículo adicionado com sucesso!");
+                    document.getElementById("v-id").value = "";
+                    document.getElementById("v-nome").value = "";
+                    document.getElementById("v-capacidade").value = "44";
+                    carregarVeiculos();
+                } else {
+                    showToast(data.erro || "Erro ao adicionar.", "error");
+                }
+            })
+            .catch(() => showToast("Erro de conexão.", "error"));
+        }
+
+        function abrirEdicaoVeiculo(id) {
+            const v = todosVeiculos.find(x => x.id === id);
+            if (!v) return;
+
+            document.getElementById("edit-v-id-original").value = v.id;
+            document.getElementById("edit-v-nome").value = v.nome || "";
+            document.getElementById("edit-v-tipo").value = v.tipo;
+            document.getElementById("edit-v-capacidade").value = v.capacidade;
+            document.getElementById("modal-veiculo").classList.add("open");
+        }
+
+        function fecharModal() {
+            document.getElementById("modal-veiculo").classList.remove("open");
+        }
+
+        function salvarEdicaoVeiculo() {
+            const id = document.getElementById("edit-v-id-original").value;
+            const nome = document.getElementById("edit-v-nome").value.trim();
+            const tipo = document.getElementById("edit-v-tipo").value;
+            const capacidade = parseInt(document.getElementById("edit-v-capacidade").value);
+
+            fetch(`/api/veiculos/${encodeURIComponent(id)}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json", "X-Admin-Token": adminToken },
+                body: JSON.stringify({ nome, tipo, capacidade })
+            })
+            .then(res => res.json().then(d => ({ ok: res.ok, data: d })))
+            .then(({ ok, data }) => {
+                if (ok && data.sucesso) {
+                    showToast("Veículo atualizado!");
+                    fecharModal();
+                    carregarVeiculos();
+                } else {
+                    showToast(data.erro || "Erro ao atualizar.", "error");
+                }
+            })
+            .catch(() => showToast("Erro de conexão.", "error"));
+        }
+
+        function excluirVeiculo(id) {
+            if (!confirm(`Desativar veículo ${id}?`)) return;
+
+            fetch(`/api/veiculos/${encodeURIComponent(id)}`, {
+                method: "DELETE",
+                headers: { "X-Admin-Token": adminToken }
+            })
+            .then(res => res.json().then(d => ({ ok: res.ok, data: d })))
+            .then(({ ok, data }) => {
+                if (ok && data.sucesso) {
+                    showToast("Veículo desativado.");
+                    carregarVeiculos();
+                } else {
+                    showToast(data.erro || "Erro.", "error");
+                }
+            });
+        }
+
+        function reativarVeiculo(id) {
+            fetch(`/api/veiculos/${encodeURIComponent(id)}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json", "X-Admin-Token": adminToken },
+                body: JSON.stringify({ ativo: true })
+            })
+            .then(res => res.json().then(d => ({ ok: res.ok, data: d })))
+            .then(({ ok, data }) => {
+                if (ok && data.sucesso) {
+                    showToast("Veículo reativado!");
+                    carregarVeiculos();
+                } else {
+                    showToast(data.erro || "Erro.", "error");
+                }
+            });
+        }
+
+        // ══════════════════════════════════════════════
+        // PASSAGEIROS — CRUD
+        // ══════════════════════════════════════════════
+        function carregarPassageiros() {
+            fetch("/api/passageiros", {
+                headers: { "X-Admin-Token": adminToken }
+            })
+            .then(res => res.json())
+            .then(data => {
+                todosPassageiros = data;
+                renderizarPassageiros();
+            });
+        }
+
+        function renderizarPassageiros(lista) {
+            const body = document.getElementById("passageiros-table-body");
+            body.innerHTML = "";
+            const arr = lista || todosPassageiros;
+
+            if (arr.length === 0) {
+                body.innerHTML = `<tr><td colspan="6" class="empty-state"><span class="empty-icon">👤</span>Nenhum passageiro encontrado.</td></tr>`;
+                return;
+            }
+
+            arr.forEach(p => {
+                const tr = document.createElement("tr");
+                const vagaBadge = p.tipo_vaga === "EXCECAO"
+                    ? `<span class="badge badge-excecao">EXCEÇÃO</span>`
+                    : `<span class="badge badge-normal">NORMAL</span>`;
+                const statusBadge = p.ativo
+                    ? `<span class="badge badge-active">ATIVO</span>`
+                    : `<span class="badge badge-inactive">INATIVO</span>`;
+
+                tr.innerHTML = `
+                    <td style="font-family: monospace; font-weight: 600;">${p.cpf}</td>
+                    <td style="font-weight: 600;">${p.nome}</td>
+                    <td>${p.rota}</td>
+                    <td>${vagaBadge}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        ${p.ativo
+                            ? `<button class="btn btn-danger btn-sm" onclick="excluirPassageiro('${p.cpf}')">🗑️</button>`
+                            : `<span style="font-size:0.75rem; color: var(--text-secondary);">Desativado</span>`
+                        }
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        function filtrarPassageiros() {
+            const search = document.getElementById("passageiros-search").value.toLowerCase().trim();
+            if (!search) {
+                renderizarPassageiros();
+                return;
+            }
+            const filtrados = todosPassageiros.filter(p =>
+                p.nome.toLowerCase().includes(search) || p.cpf.includes(search)
+            );
+            renderizarPassageiros(filtrados);
+        }
+
+        function cadastrarPassageiro() {
+            const cpf = document.getElementById("p-cpf").value.replace(/\D/g, "").trim();
+            const nome = document.getElementById("p-nome").value.trim();
+            const rota = document.getElementById("p-rota").value.trim();
+            const pin = document.getElementById("p-pin").value.trim();
+            const tipo_vaga = document.getElementById("p-tipo").value;
+
+            if (cpf.length !== 11) { showToast("CPF deve ter 11 dígitos numéricos.", "error"); return; }
+            if (!nome) { showToast("Nome é obrigatório.", "error"); return; }
+            if (!rota) { showToast("Rota é obrigatória.", "error"); return; }
+            if (pin.length !== 4 || !/^\d{4}$/.test(pin)) { showToast("PIN deve ter 4 dígitos.", "error"); return; }
+
+            fetch("/api/passageiros", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "X-Admin-Token": adminToken },
+                body: JSON.stringify({ cpf, nome, rota, pin, tipo_vaga })
+            })
+            .then(res => res.json().then(d => ({ ok: res.ok, data: d })))
+            .then(({ ok, data }) => {
+                if (data.sucesso) {
+                    showToast("Passageiro cadastrado com sucesso!");
+                    document.getElementById("p-cpf").value = "";
+                    document.getElementById("p-nome").value = "";
+                    document.getElementById("p-rota").value = "";
+                    document.getElementById("p-pin").value = "";
+                    carregarPassageiros();
+                } else {
+                    showToast(data.erro || "Erro ao cadastrar.", "error");
+                }
+            })
+            .catch(() => showToast("Erro de conexão.", "error"));
+        }
+
+        function excluirPassageiro(cpf) {
+            if (!confirm(`Desativar passageiro CPF ${cpf}?`)) return;
+
+            fetch(`/api/passageiros/${cpf}`, {
+                method: "DELETE",
+                headers: { "X-Admin-Token": adminToken }
+            })
+            .then(res => res.json().then(d => ({ ok: res.ok, data: d })))
+            .then(({ ok, data }) => {
+                if (ok && data.sucesso) {
+                    showToast("Passageiro desativado.");
+                    carregarPassageiros();
+                } else {
+                    showToast(data.erro || "Erro.", "error");
+                }
+            });
+        }
+
+        // ══════════════════════════════════════════════
+        // AVISOS — CRUD (Requisito A)
+        // ══════════════════════════════════════════════
+        let todosAvisos = [];
+
+        function carregarAvisos() {
+            fetch("/api/avisos?incluir_expirados=1", {
+                headers: { "X-Admin-Token": adminToken }
+            })
+            .then(res => res.json())
+            .then(data => {
+                todosAvisos = data.avisos || [];
+                renderizarAvisos();
+                // Atualizar contador de limite
+                const ativos = todosAvisos.filter(a => a.ativo).length;
+                document.getElementById("avisos-limite").textContent = `${ativos}/10 avisos ativos`;
+            });
+        }
+
+        function renderizarAvisos() {
+            const body = document.getElementById("avisos-table-body");
+            body.innerHTML = "";
+
+            if (todosAvisos.length === 0) {
+                body.innerHTML = `<tr><td colspan="6" class="empty-state"><span class="empty-icon">📢</span>Nenhum aviso publicado.</td></tr>`;
+                return;
+            }
+
+            todosAvisos.forEach(a => {
+                const tr = document.createElement("tr");
+                const tipoBadge = a.tipo === "URGENTE"
+                    ? `<span class="badge badge-excecao">⚠️ URGENTE</span>`
+                    : `<span class="badge badge-normal">ℹ️ INFO</span>`;
+
+                const statusBadge = a.ativo
+                    ? `<span class="badge badge-active">ATIVO</span>`
+                    : `<span class="badge badge-inactive">ARQUIVADO</span>`;
+
+                const expira = a.expira_em
+                    ? a.expira_em.split("-").reverse().join("/")
+                    : "Sem expiração";
+
+                const mensagemCurta = a.mensagem.length > 60
+                    ? a.mensagem.substring(0, 60) + "..."
+                    : a.mensagem;
+
+                tr.innerHTML = `
+                    <td>${tipoBadge}</td>
+                    <td style="font-weight: 700;">${a.titulo}</td>
+                    <td style="font-size: 0.85rem; color: var(--text-secondary);">${mensagemCurta}</td>
+                    <td style="font-size: 0.85rem;">${expira}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        ${a.ativo ? `
+                            <button class="btn btn-secondary btn-sm" onclick="abrirEdicaoAviso('${a.id}')">✏️</button>
+                            <button class="btn btn-danger btn-sm" onclick="arquivarAviso('${a.id}')">🗑️</button>
+                        ` : `<span style="font-size:0.75rem; color: var(--text-secondary);">Arquivado</span>`}
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        function criarAviso() {
+            const titulo = document.getElementById("av-titulo").value.trim();
+            const mensagem = document.getElementById("av-mensagem").value.trim();
+            const tipo = document.getElementById("av-tipo").value;
+            const expira_em = document.getElementById("av-expira").value || null;
+
+            if (!titulo) { showToast("Título é obrigatório.", "error"); return; }
+            if (!mensagem) { showToast("Mensagem é obrigatória.", "error"); return; }
+
+            fetch("/api/avisos", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "X-Admin-Token": adminToken },
+                body: JSON.stringify({ titulo, mensagem, tipo, expira_em })
+            })
+            .then(res => res.json().then(d => ({ ok: res.ok, data: d })))
+            .then(({ ok, data }) => {
+                if (data.sucesso) {
+                    showToast("Aviso publicado com sucesso!");
+                    document.getElementById("av-titulo").value = "";
+                    document.getElementById("av-mensagem").value = "";
+                    document.getElementById("av-expira").value = "";
+                    carregarAvisos();
+                } else {
+                    showToast(data.erro || "Erro ao criar aviso.", "error");
+                }
+            })
+            .catch(() => showToast("Erro de conexão.", "error"));
+        }
+
+        function abrirEdicaoAviso(id) {
+            const a = todosAvisos.find(x => x.id === id);
+            if (!a) return;
+
+            document.getElementById("edit-av-id").value = a.id;
+            document.getElementById("edit-av-titulo").value = a.titulo;
+            document.getElementById("edit-av-mensagem").value = a.mensagem;
+            document.getElementById("edit-av-tipo").value = a.tipo;
+            document.getElementById("edit-av-expira").value = a.expira_em || "";
+            document.getElementById("modal-aviso").classList.add("open");
+        }
+
+        function fecharModalAviso() {
+            document.getElementById("modal-aviso").classList.remove("open");
+        }
+
+        function salvarEdicaoAviso() {
+            const id = document.getElementById("edit-av-id").value;
+            const titulo = document.getElementById("edit-av-titulo").value.trim();
+            const mensagem = document.getElementById("edit-av-mensagem").value.trim();
+            const tipo = document.getElementById("edit-av-tipo").value;
+            const expira_em = document.getElementById("edit-av-expira").value || null;
+
+            fetch(`/api/avisos/${encodeURIComponent(id)}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json", "X-Admin-Token": adminToken },
+                body: JSON.stringify({ titulo, mensagem, tipo, expira_em })
+            })
+            .then(res => res.json().then(d => ({ ok: res.ok, data: d })))
+            .then(({ ok, data }) => {
+                if (ok && data.sucesso) {
+                    showToast("Aviso atualizado!");
+                    fecharModalAviso();
+                    carregarAvisos();
+                } else {
+                    showToast(data.erro || "Erro ao atualizar.", "error");
+                }
+            })
+            .catch(() => showToast("Erro de conexão.", "error"));
+        }
+
+        function arquivarAviso(id) {
+            if (!confirm("Arquivar este aviso? Ele não será mais exibido aos alunos.")) return;
+
+            fetch(`/api/avisos/${encodeURIComponent(id)}`, {
+                method: "DELETE",
+                headers: { "X-Admin-Token": adminToken }
+            })
+            .then(res => res.json().then(d => ({ ok: res.ok, data: d })))
+            .then(({ ok, data }) => {
+                if (ok && data.sucesso) {
+                    showToast("Aviso arquivado.");
+                    carregarAvisos();
+                } else {
+                    showToast(data.erro || "Erro.", "error");
+                }
+            });
+        }
+
+        // ══════════════════════════════════════════════
+        // PONTOS DE ROTA — CRUD (Requisito B)
+        // ══════════════════════════════════════════════
+        let todosPontos = [];
+
+        function carregarPontosRota() {
+            fetch("/api/pontos-rota", {
+                headers: { "X-Admin-Token": adminToken }
+            })
+            .then(res => res.json())
+            .then(data => {
+                todosPontos = data.pontos || [];
+                renderizarPontos();
+            });
+        }
+
+        function renderizarPontos() {
+            const body = document.getElementById("pontos-table-body");
+            body.innerHTML = "";
+
+            if (todosPontos.length === 0) {
+                body.innerHTML = `<tr><td colspan="5" class="empty-state"><span class="empty-icon">📍</span>Nenhum ponto cadastrado.</td></tr>`;
+                return;
+            }
+
+            todosPontos.forEach(p => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td style="font-weight: 600;">${p.rota || p.rota_id}</td>
+                    <td style="font-weight: 700; color: var(--accent);">${p.ordem}</td>
+                    <td>${p.nome}</td>
+                    <td style="font-family: monospace; font-size: 0.8rem;">${p.id}</td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm" onclick="abrirEdicaoPonto('${p.id}')">✏️</button>
+                        <button class="btn btn-danger btn-sm" onclick="excluirPontoRota('${p.id}')">🗑️</button>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        function criarPontoRota() {
+            const rota_id = document.getElementById("pt-rota").value;
+            const nome = document.getElementById("pt-nome").value.trim();
+            const ordem = parseInt(document.getElementById("pt-ordem").value);
+
+            if (!rota_id) { showToast("Rota é obrigatória.", "error"); return; }
+            if (!nome) { showToast("Nome do ponto é obrigatório.", "error"); return; }
+            if (!ordem || ordem <= 0) { showToast("Ordem deve ser um número positivo.", "error"); return; }
+
+            fetch("/api/pontos-rota", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "X-Admin-Token": adminToken },
+                body: JSON.stringify({ rota_id, nome, ordem })
+            })
+            .then(res => res.json().then(d => ({ ok: res.ok, data: d })))
+            .then(({ ok, data }) => {
+                if (data.sucesso) {
+                    showToast("Ponto cadastrado com sucesso!");
+                    document.getElementById("pt-nome").value = "";
+                    document.getElementById("pt-ordem").value = parseInt(document.getElementById("pt-ordem").value) + 1;
+                    carregarPontosRota();
+                } else {
+                    showToast(data.erro || "Erro ao cadastrar.", "error");
+                }
+            })
+            .catch(() => showToast("Erro de conexão.", "error"));
+        }
+
+        function abrirEdicaoPonto(id) {
+            const p = todosPontos.find(x => x.id === id);
+            if (!p) return;
+
+            document.getElementById("edit-pt-id").value = p.id;
+            document.getElementById("edit-pt-nome").value = p.nome;
+            document.getElementById("edit-pt-ordem").value = p.ordem;
+            document.getElementById("modal-ponto").classList.add("open");
+        }
+
+        function fecharModalPonto() {
+            document.getElementById("modal-ponto").classList.remove("open");
+        }
+
+        function salvarEdicaoPonto() {
+            const id = document.getElementById("edit-pt-id").value;
+            const nome = document.getElementById("edit-pt-nome").value.trim();
+            const ordem = parseInt(document.getElementById("edit-pt-ordem").value);
+
+            if (!nome) { showToast("Nome é obrigatório", "error"); return; }
+
+            fetch(`/api/pontos-rota/${encodeURIComponent(id)}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json", "X-Admin-Token": adminToken },
+                body: JSON.stringify({ nome, ordem })
+            })
+            .then(res => res.json().then(d => ({ ok: res.ok, data: d })))
+            .then(({ ok, data }) => {
+                if (ok && data.sucesso) {
+                    showToast("Ponto atualizado!");
+                    fecharModalPonto();
+                    carregarPontosRota();
+                } else {
+                    showToast(data.erro || "Erro ao atualizar.", "error");
+                }
+            })
+            .catch(() => showToast("Erro de conexão.", "error"));
+        }
+
+        function excluirPontoRota(id) {
+            if (!confirm(`Remover ponto ${id}?`)) return;
+
+            fetch(`/api/pontos-rota/${encodeURIComponent(id)}`, {
+                method: "DELETE",
+                headers: { "X-Admin-Token": adminToken }
+            })
+            .then(res => res.json().then(d => ({ ok: res.ok, data: d })))
+            .then(({ ok, data }) => {
+                if (ok && data.sucesso) {
+                    showToast("Ponto removido.");
+                    carregarPontosRota();
+                } else {
+                    showToast(data.erro || "Erro.", "error");
+                }
+            });
+        }
+
+        // ══════════════════════════════════════════════
+        // CONFIGURAÇÕES
+        // ══════════════════════════════════════════════
+        function carregarConfiguracoes() {
+            // Carregar configs atuais
+            fetch("/api/configuracoes", {
+                headers: { "X-Admin-Token": adminToken }
+            })
+            .then(res => res.json())
+            .then(config => {
+                // Horário de corte
+                if (config.horario_corte) {
+                    document.getElementById("config-horario").value = config.horario_corte;
+                }
+
+                // Trava manual
+                if (config.trava_manual) {
+                    atualizarTravaUI(config.trava_manual);
+                }
+            });
+
+            // Status
+            carregarConfigStatus();
+
+            // Server info
+            fetch("/api/server-time")
+            .then(r => r.json())
+            .then(data => {
+                const utcDate = new Date(data.utc);
+                const localDate = new Date(data.local);
+                document.getElementById("server-info").innerHTML = `
+                    <div><strong>Hora UTC:</strong> ${utcDate.toLocaleString('pt-BR', { timeZone: 'UTC' })}</div>
+                    <div><strong>Hora Local (Servidor):</strong> ${localDate.toLocaleString('pt-BR')}</div>
+                    <div><strong>Timestamp:</strong> ${data.timestamp}</div>
+                    <div><strong>Fuso Horário:</strong> America/Sao_Paulo</div>
+                `;
+            });
+        }
+
+        function carregarConfigStatus() {
+            fetch("/api/status-inscricoes")
+            .then(r => r.json())
+            .then(data => {
+                const display = document.getElementById("config-status-display");
+                const isOpen = data.status === "ABERTO";
+                display.innerHTML = `
+                    <div class="status-card ${isOpen ? 'status-open' : 'status-closed'}">
+                        <div class="status-dot"></div>
+                        <div>
+                            <div class="status-text">Inscrições: ${data.status}</div>
+                            <div class="status-detail">${data.motivo}</div>
+                            <div class="status-detail" style="margin-top: 0.25rem;">
+                                Trava: <strong>${data.trava_manual}</strong> | Corte: <strong>${data.horario_corte}</strong>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function salvarHorarioCorte() {
+            const horario = document.getElementById("config-horario").value;
+            if (!horario) { showToast("Selecione um horário.", "error"); return; }
+
+            fetch("/api/configuracoes", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json", "X-Admin-Token": adminToken },
+                body: JSON.stringify({ horario_corte: horario })
+            })
+            .then(res => res.json().then(d => ({ ok: res.ok, data: d })))
+            .then(({ ok, data }) => {
+                if (ok && data.sucesso) {
+                    showToast(`Horário de corte alterado para ${horario}`);
+                    carregarConfigStatus();
+                } else {
+                    showToast(data.erro || "Erro ao salvar.", "error");
+                }
+            })
+            .catch(() => showToast("Erro de conexão.", "error"));
+        }
+
+        function setTrava(valor) {
+            fetch("/api/configuracoes", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json", "X-Admin-Token": adminToken },
+                body: JSON.stringify({ trava_manual: valor })
+            })
+            .then(res => res.json().then(d => ({ ok: res.ok, data: d })))
+            .then(({ ok, data }) => {
+                if (ok && data.sucesso) {
+                    atualizarTravaUI(valor);
+                    carregarConfigStatus();
+                    const msgs = {
+                        AUTO: "Modo automático ativado.",
+                        ABERTO: "Inscrições ABERTAS manualmente!",
+                        FECHADO: "Inscrições FECHADAS manualmente!"
+                    };
+                    showToast(msgs[valor] || "Trava atualizada.");
+                } else {
+                    showToast(data.erro || "Erro.", "error");
+                }
+            });
+        }
+
+        function atualizarTravaUI(valor) {
+            const btns = document.querySelectorAll("#trava-switch .toggle-option");
+            btns.forEach(btn => {
+                btn.classList.remove("active", "active-success", "active-danger");
+                if (btn.dataset.val === valor) {
+                    if (valor === "ABERTO") btn.classList.add("active-success");
+                    else if (valor === "FECHADO") btn.classList.add("active-danger");
+                    else btn.classList.add("active");
+                }
+            });
+
+            const desc = document.getElementById("trava-descricao");
+            const descs = {
+                AUTO: "Automático — segue o horário de corte",
+                ABERTO: "Manual — inscrições ABERTAS (override)",
+                FECHADO: "Manual — inscrições FECHADAS (override)"
+            };
+            desc.textContent = descs[valor] || "";
+        }
+
+        // ══════════════════════════════════════════════
+        // ROTAS — CRUD
+        // ══════════════════════════════════════════════
+        let todasRotas = [];
+        
+        function carregarRotas(isForTracking = false) {
+            fetch("/api/rotas", { headers: { "X-Admin-Token": adminToken } })
+            .then(res => res.json())
+            .then(data => {
+                todasRotas = data.rotas || [];
+                
+                if (isForTracking) {
+                    const sel = document.getElementById("gestora-tracking-rota");
+                    const prev = sel.value;
+                    sel.innerHTML = '<option value="">Todas as Rotas</option>';
+                    todasRotas.forEach(r => {
+                        sel.innerHTML += `<option value="${r.id}">${r.nome}</option>`;
+                    });
+                    sel.value = prev || "";
+                    return;
+                }
+                
+                // Route for Ponto creation select
+                const ptSelect = document.getElementById("pt-rota");
+                if (ptSelect) {
+                    ptSelect.innerHTML = '<option value="">Selecione uma rota...</option>';
+                    todasRotas.forEach(r => {
+                        ptSelect.innerHTML += `<option value="${r.id}">${r.nome}</option>`;
+                    });
+                }
+                
+                if (window.location.hash.replace("#", "") === "rotas") {
+                    renderizarRotas();
+                }
+            });
+        }
+        
+        function renderizarRotas() {
+            const body = document.getElementById("rotas-table-body");
+            body.innerHTML = "";
+
+            if (todasRotas.length === 0) {
+                body.innerHTML = `<tr><td colspan="4" class="empty-state"><span class="empty-icon">🛣️</span>Nenhuma rota cadastrada.</td></tr>`;
+                return;
+            }
+
+            todasRotas.forEach(r => {
+                const tr = document.createElement("tr");
+                const statusBadge = r.ativo
+                    ? `<span class="badge badge-active">ATIVA</span>`
+                    : `<span class="badge badge-inactive">INATIVA</span>`;
+
+                tr.innerHTML = `
+                    <td style="font-family: monospace; font-size: 0.8rem;">${r.id}</td>
+                    <td style="font-weight: 700;">${r.nome}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" onclick="excluirRota('${r.id}')">🗑️</button>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+        
+        function criarRota() {
+            const nome = document.getElementById("rt-nome").value.trim();
+            if (!nome) { showToast("Nome da rota é obrigatório.", "error"); return; }
+            
+            fetch("/api/rotas", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "X-Admin-Token": adminToken },
+                body: JSON.stringify({ nome })
+            })
+            .then(res => res.json().then(d => ({ ok: res.ok, data: d })))
+            .then(({ ok, data }) => {
+                if (ok && data.sucesso) {
+                    showToast("Rota criada!");
+                    document.getElementById("rt-nome").value = "";
+                    carregarRotas();
+                } else {
+                    showToast(data.erro || "Erro ao criar rota.", "error");
+                }
+            })
+            .catch(() => showToast("Erro de conexão.", "error"));
+        }
+        
+        function excluirRota(id) {
+            if (!confirm(`Remover rota ${id}? Isso apagará os pontos associados.`)) return;
+
+            fetch(`/api/rotas/${encodeURIComponent(id)}`, {
+                method: "DELETE",
+                headers: { "X-Admin-Token": adminToken }
+            })
+            .then(res => res.json().then(d => ({ ok: res.ok, data: d })))
+            .then(({ ok, data }) => {
+                if (ok && data.sucesso) {
+                    showToast("Rota removida.");
+                    carregarRotas();
+                } else {
+                    showToast(data.erro || "Erro.", "error");
+                }
+            });
+        }
+
+        // ══════════════════════════════════════════════
+        // RELATÓRIOS (Exportação CSV em Lote)
+        // ══════════════════════════════════════════════
+        function baixarRelatorioViagens() {
+            const dtInicio = document.getElementById("rel-data-inicio").value;
+            const dtFim = document.getElementById("rel-data-fim").value;
+            
+            if (!dtInicio || !dtFim) {
+                showToast("Preencha as duas datas.", "error");
+                return;
+            }
+            if (new Date(dtInicio) > new Date(dtFim)) {
+                showToast("Data Início deve ser antes da Data Fim.", "error");
+                return;
+            }
+
+            const url = `/api/relatorios/viagens?data_inicio=${dtInicio}&data_fim=${dtFim}`;
+            
+            fetch(url, { headers: { "X-Admin-Token": adminToken } })
+            .then(res => {
+                if (!res.ok) throw new Error("Erro na requisição");
+                return res.blob();
+            })
+            .then(blob => {
+                const urlBlob = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.style.display = "none";
+                a.href = urlBlob;
+                a.download = `VEM_Relatorio_Viagens_${dtInicio}_a_${dtFim}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                URL.revokeObjectURL(urlBlob);
+                a.remove();
+                showToast("Relatório baixado com sucesso!");
+            })
+            .catch(() => {
+                showToast("Falha ao exportar relatório.", "error");
+            });
+        }
+
+        // ══════════════════════════════════════════════
+        // RASTREAMENTO GESTORA (Polling)
+        // ══════════════════════════════════════════════
+        let trackingGestoraInterval = null;
+
+        function iniciarPollingTrackingGestora() {
+            renderTrackingGestora(); // Chamada inicial
+            if (!trackingGestoraInterval) {
+                trackingGestoraInterval = setInterval(renderTrackingGestora, 15000); // A cada 15s
+            }
+        }
+
+        function pararPollingTrackingGestora() {
+            if (trackingGestoraInterval) {
+                clearInterval(trackingGestoraInterval);
+                trackingGestoraInterval = null;
+            }
+        }
+
+        function renderTrackingGestora() {
+            const dataVal = document.getElementById("filter-date").value || new Date().toISOString().split('T')[0];
+            const rotaFiltro = document.getElementById("gestora-tracking-rota").value;
+
+            fetch(`/api/status-viagem/${dataVal}`)
+            .then(r => r.json())
+            .then(data => {
+                const container = document.getElementById("gestora-tracking-container");
+                if (!data.viagens || data.viagens.length === 0) {
+                    container.innerHTML = `<span style="color:var(--text-secondary);font-size:0.85rem;">Nenhuma viagem em andamento para hoje.</span>`;
+                    return;
+                }
+                
+                let viagensToShow = data.viagens;
+                if (rotaFiltro) {
+                    // Filtrar as viagens que correspondam a rota_id
+                    viagensToShow = viagensToShow.filter(v => v.rota_id === rotaFiltro);
+                }
+                
+                if (viagensToShow.length === 0) {
+                    container.innerHTML = `<span style="color:var(--text-secondary);font-size:0.85rem;">Nenhuma viagem em andamento para a rota selecionada.</span>`;
+                    return;
+                }
+
+                container.innerHTML = "";
+                viagensToShow.forEach(viagem => {
+                    const card = document.createElement("div");
+                    card.className = "glass-panel";
+                    card.style.marginBottom = "0";
+                    card.style.padding = "1rem";
+                    
+                    let progressoHtml = "";
+                    if (viagem.progresso) {
+                        const pontos = viagem.progresso.pontos;
+                        const atualIdx = viagem.progresso.atual_index;
+                        const pct = ((atualIdx) / (pontos.length - 1)) * 100;
+                        
+                        progressoHtml = `
+                            <div class="tracking-progress" style="margin-top:0.5rem; position:relative; height:4px; background:rgba(255,255,255,0.1); border-radius:2px;">
+                                <div style="position:absolute; top:0; left:0; height:100%; width:${pct}%; background:var(--accent); border-radius:2px; transition:width 0.5s;"></div>
+                            </div>
+                            <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:0.4rem; text-align:right;">
+                                Ponto atual: <strong style="color:var(--accent);">${pontos[atualIdx] ? pontos[atualIdx].nome : "---"}</strong>
+                            </div>
+                        `;
+                    }
+
+                    card.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div style="font-size:0.9rem; font-weight:700;">${viagem.veiculo_id} - ${viagem.tipo}</div>
+                            <div style="font-size:0.75rem; color:${viagem.status === 'EM_ROTA' ? 'var(--success)' : 'var(--text-secondary)'}; background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px;">${viagem.status}</div>
+                        </div>
+                        <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.25rem;">Rota: ${viagem.rota_nome || 'N/A'}</div>
+                        ${progressoHtml}
+                    `;
+                    container.appendChild(card);
+                });
+            })
+            .catch(() => {
+                document.getElementById("gestora-tracking-container").innerHTML = `<span style="color:var(--danger);font-size:0.85rem;">Erro ao carregar rastreamento.</span>`;
+            });
+        }
+    </script>
+</body>
+</html>

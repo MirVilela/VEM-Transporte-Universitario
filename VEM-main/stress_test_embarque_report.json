@@ -1,0 +1,10 @@
+{
+    "Test_Type": "Embarque (Checkin)",
+    "Total_Time_Seconds": 2.42,
+    "Successful_Requests": 100,
+    "Failed_Requests": 0,
+    "Average_Time_Per_Request": 0.8585,
+    "Max_Time": 2.4168,
+    "Min_Time": 0.3106,
+    "Errors": []
+}

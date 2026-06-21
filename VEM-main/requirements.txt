@@ -1,0 +1,15 @@
+# ==============================================
+# Projeto VEM — SPTU (Sistema Preditivo de Transporte Universitário)
+# Dependências Python — Instalação: pip install -r requirements.txt
+# ==============================================
+
+# --- Framework Web (Motor da Ana / Backend) ---
+Flask>=2.0,<4.0
+
+# --- Todas as demais dependências são da biblioteca padrão do Python 3.10+ ---
+# sqlite3   — Banco de dados embutido (SQLite 3)
+# json      — Serialização/deserialização JSON
+# os        — Caminhos absolutos e variáveis de ambiente
+# hashlib   — Hash de PINs (segurança)
+# datetime  — Manipulação de datas e timestamps ISO 8601
+# logging   — Logs detalhados no terminal
